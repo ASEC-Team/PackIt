@@ -225,6 +225,8 @@ function this.buffer(write: t.Write, read: t.Read, size: number)
 		local l = buffer.len(value)
 		write(b, offset, l)
 		
+		warn(buffer.len(b), offset, size, l)
+		
 		offset += size
 		buffer.copy(b, offset, value)
 		return offset +l
@@ -252,8 +254,14 @@ function this.schema()
 	local read = wrapper.read
 	
 	function wrapper.lenght(value: any, options: t.ParserOptions)
+		local opt: any = options.options
+		if opt and opt.SerOptions and (opt.SerOptions :: any).Compress then
+			error("Schema compression in sub-schema, highly unreliable.")
+		end
+		
 		local s = options.value
-		return s.schema:Bytes(value, s.options) +size
+		local ser = s.schema:Serialize(value, s.options)
+		return buffer.len(ser) +size
 	end
 
 	function wrapper.write(b: buffer, offset: number, value: any, options: t.ParserOptions)

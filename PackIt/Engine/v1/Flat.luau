@@ -19,11 +19,23 @@ type Proto = {
 }
 
 -- Helpers
+local function copyDict(dict: {[any]: any})
+	local new = {}
+	for k, v in pairs(dict or {}) do
+		new[k] = v
+	end
+	
+	return new
+end
+
 local function parserOptions(options: t.UnifiedEntryOptions?)
 	options = options or {} :: t.UnifiedEntryOptions
+	local ser = copyDict(options.SerOptions :: any)
+	ser.Mode = "Flat"
+	
 	local schema = (options :: any).Schema and {
 		schema = (options :: any).Schema,
-		options = options.SerOptions
+		options = ser
 	}
 	
 	return {
@@ -79,7 +91,7 @@ function alloc.dict(logic: t.SchematizedDict, data: t.DictData): number
 		size += t[entry.type]:Bytes(data[entry.key],
 			parserOptions(entry.options) :: any)
 	end
-
+	
 	return size
 end
 
