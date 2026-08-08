@@ -82,8 +82,7 @@ local function float(v: number)
 	buffer.writef32(b, 0, v)
 
 	local f32_val = buffer.readf32(b, 0)
-	return t, math.abs(v -f32_val) < math
-		.abs(v) *1e-7 and 32 or 64
+	return t, v == f32_val and 32 or 64
 end
 
 function parsers.BrickColor() return "brickcolor" end

@@ -45,24 +45,24 @@ local function newlCFrame(ax: number, ay: number, az: number, angle: number, x: 
 	) +Vector3.new(x, y, z)
 end
 
-local function conformAutoValue(value: any, options: t.ParserOptions): any
+local function conformAutoValue(value: any, options: t.ParserOptions, read: boolean?): any
 	if not options.options or not options.options.Round then
 		return value end
 
 	local t = typeof(value)
 	if t == "number" then
-		return round(value, options)
+		return round(value, options, read)
 
 	elseif t == "Vector2" then
 		return Vector2.new(
-			round(value.X, options),
-			round(value.Y, options))
+			round(value.X, options, read),
+			round(value.Y, options, read))
 
 	elseif t == "Vector3" then
 		return Vector3.new(
-			round(value.X, options),
-			round(value.Y, options),
-			round(value.Z, options))
+			round(value.X, options, read),
+			round(value.Y, options, read),
+			round(value.Z, options, read))
 	end
 	
 	-- CFrame not required atm
@@ -224,8 +224,6 @@ function this.buffer(write: t.Write, read: t.Read, size: number)
 	function wrapper.write(b: buffer, offset: number, value: buffer)
 		local l = buffer.len(value)
 		write(b, offset, l)
-		
-		warn(buffer.len(b), offset, size, l)
 		
 		offset += size
 		buffer.copy(b, offset, value)
@@ -435,7 +433,7 @@ function this.auto()
 		local v = conformAutoValue(value, options)
 		
 		local type, id = a.getId(v, options)
-		return type:Bytes(value, options) +1
+		return type:Bytes(v, options) +1
 	end
 	
 	function wrapper.write(b: buffer, offset: number, value: any, options: t.ParserOptions)
@@ -444,8 +442,7 @@ function this.auto()
 		
 		local type, id = a.getId(v, options)
 		buffer.writeu8(b, offset, id)
-		
-		return type:Write(b, offset +1, value, options)
+		return type:Write(b, offset +1, v, options)
 	end
 	
 	function wrapper.read(b: buffer, offset: number, options: t.ParserOptions)
@@ -453,7 +450,8 @@ function this.auto()
 		local id = buffer.readu8(b, offset)
 		
 		local type = a.fromId(id, options)
-		return type:Read(b, offset +1, options)
+		local v = type:Read(b, offset +1, options)
+		return conformAutoValue(v, options, true)
 	end
 	
 	return wrapper

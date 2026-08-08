@@ -143,7 +143,7 @@ this.enum = t.new("enum", s.BYTE, {
 -- Numeric
 this.id = t.new("id", s.QWORD, {
 	[s.QWORD] = { write = buffer.writef64, read = buffer.readf64 }
-}, 0, { z.IS_POSITIVE, z.HAS_FLOAT_SIZE })
+}, 0, { z.IS_NUMBER, z.IS_POSITIVE, z.HAS_FLOAT_SIZE })
 
 this.int = t.new("int", s.BYTE, w.numbers({
 	[s.BYTE] = { write = buffer.writei8, read = buffer.readi8 },

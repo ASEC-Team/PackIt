@@ -120,8 +120,6 @@ function this.serialize(logi: Schematized, data: Data, options: _SerOptions): bu
 	local size = header:Bytes()
 	local b = ser:Alloc(size)
 	
-	warn(buffer.len(b))
-	
 	local off = header:Write(b, 0, h)
 	local res = ser:Serialize(b, off)
 	
