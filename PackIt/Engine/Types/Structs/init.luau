@@ -450,8 +450,8 @@ function this.auto()
 		local id = buffer.readu8(b, offset)
 		
 		local type = a.fromId(id, options)
-		local v = type:Read(b, offset +1, options)
-		return conformAutoValue(v, options, true)
+		local v, off = type:Read(b, offset +1, options)
+		return conformAutoValue(v, options, true), off
 	end
 	
 	return wrapper
