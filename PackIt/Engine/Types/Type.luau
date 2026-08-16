@@ -42,6 +42,7 @@ export type EnumOptions = {
 export type UnifiedEntryOptions = {
 	Values: Enum|{string|EnumItem}?,
 	Lenght: number?,
+	Index: number?
 
 } & EntryOptions
 

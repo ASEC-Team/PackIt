@@ -25,30 +25,34 @@ export type UnifiedEntryOptions = e.UnifiedEntryOptions & {
 }
 
 export type DictLogical = {
-	keys: {[string]: DictEntry},
+	keys: {[string|number]: DictEntry},
 	entries: {DictEntry}
 }
 
 type DictSchemaProto = { 
-	_variants: {DictVariant}
+	_cache: {[number]: SchematizedDict},
+	_variants: {DictVariant},
+	_indexed: boolean?
 }
 
 type DictVariantProto = {
 	_logical: DictLogical,
-	_base: DictSchema
+	_base: DictSchema,
+	_lastKey: number?
 }
 
 type DictMethods = {
-	Load: (self: DictVariant, data: buffer|DictData, options: Versioning?) -> DictData,
+	Deserialize: (self: DictVariant, data: buffer, skipSanitize: boolean?) -> (DictData, number),
+	Load: (self: DictVariant, data: buffer|DictData, options: SerOptions?) -> DictData,
 	Template: (self: DictVariant, options: Versioning?, lists: boolean?) -> DictData,
 	Serialize: (self: DictVariant, data: DictData, options: SerOptions?) -> buffer,
 	Bytes: (self: DictVariant, data: DictData, options: SerOptions?) -> number,
-	Deserialize: (self: DictVariant, data: buffer) -> (DictData, number),
 	Logic: (self: DictVariant, options: Versioning?) -> SchematizedDict,
 	Variant: (self: DictVariant, version: number?) -> DictVariant,
 	Build: (self: DictVariant) -> DictVariant,
 	
 	schema: (self: DictVariant, key: string, schema: Variant|Schema, options: e.SerOptions?) -> DictVariant,
+	tuple: (self: DictVariant, key: string, func: (tuple: TupleVariant) -> ()) -> DictVariant,
 	dict: (self: DictVariant, key: string, func: (dict: DictVariant) -> ()) -> DictVariant,
 	list: (self: DictVariant, key: string, func: (list: ListVariant) -> ()) -> DictVariant,
 	
@@ -87,6 +91,57 @@ local dict_mt = { __index = {} :: DictMethods }
 export type DictSchema = typeof(setmetatable({} :: DictSchemaProto, dict_mt))
 export type DictVariant = typeof(setmetatable({} :: DictVariantProto, dict_mt))
 
+type TupleIndex = { Index: number? }
+type TupleMethods = {
+	Deserialize: (self: TupleVariant, data: buffer, skipSanitize: boolean?) -> (ListData, number),
+	Load: (self: TupleVariant, data: buffer|ListData, options: SerOptions?) -> ListData,
+	Template: (self: TupleVariant, options: Versioning?, lists: boolean?) -> ListData,
+	Serialize: (self: TupleVariant, data: ListData, options: SerOptions?) -> buffer,
+	Bytes: (self: TupleVariant, data: ListData, options: SerOptions?) -> number,
+	Logic: (self: TupleVariant, options: Versioning?) -> SchematizedDict,
+	Variant: (self: TupleVariant, version: number?) -> TupleVariant,
+	Build: (self: TupleVariant) -> TupleVariant,
+
+	schema: (self: TupleVariant, schema: Variant|Schema, options: e.SerOptions?) -> TupleVariant,
+	tuple: (self: TupleVariant, func: (tuple: TupleVariant) -> ()) -> TupleVariant,
+	dict: (self: TupleVariant, func: (dict: DictVariant) -> ()) -> TupleVariant,
+	list: (self: TupleVariant, func: (list: ListVariant) -> ()) -> TupleVariant,
+
+	brickcolor: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	varchar: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	color3: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	buffer: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	char: (self: TupleVariant, options: (e.LenghtOptions & TupleIndex)) -> TupleVariant,
+	bool: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	bits: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	auto: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	enum: (self: TupleVariant, options: (e.EnumOptions & TupleIndex)) -> TupleVariant,
+	id: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+
+	number: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	float: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	uint: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	int: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+
+	numberVec3: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	floatVec3: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	uintVec3: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	intVec3: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+
+	numberVec2: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	floatVec2: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	uintVec2: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	intVec2: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+
+	lcframe: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant,
+	cframe: (self: TupleVariant, options: (e.EntryOptions & TupleIndex)?) -> TupleVariant
+}
+
+local tuple_mt = { __index = {} :: TupleMethods }
+
+export type TupleSchema = typeof(setmetatable({} :: DictSchemaProto, tuple_mt))
+export type TupleVariant = typeof(setmetatable({} :: DictVariantProto, tuple_mt))
+
 
 -- List
 export type ListData = e.ListData
@@ -98,6 +153,7 @@ export type ListLogical = {
 export type SchematizedList = e.SchematizedList
 
 type ListSchemaProto = { 
+	_cache: {[number]: SchematizedList},
 	_variants: {ListVariant}
 }
 
@@ -107,16 +163,17 @@ type ListVariantProto = {
 }
 
 type ListMethods = {
-	Load: (self: ListVariant, data: buffer|ListData, options: Versioning?) -> ListData,
+	Deserialize: (self: ListVariant, data: buffer, skipSanitize: boolean?) -> (ListData, number),
+	Load: (self: ListVariant, data: buffer|ListData, options: SerOptions?) -> ListData,
 	Template: (self: ListVariant, options: Versioning?, lists: boolean) -> ListData,
 	Serialize: (self: ListVariant, data: ListData, options: SerOptions?) -> buffer,
 	Bytes: (self: ListVariant, data: ListData, options: SerOptions?) -> number,
-	Deserialize: (self: ListVariant, data: buffer) -> (ListData, number),
 	Logic: (self: ListVariant, options: Versioning?) -> SchematizedList,
 	Variant: (self: ListVariant, version: number?) -> ListVariant,
 	Build: (self: ListVariant) -> ListVariant,
 	
 	schema: (self: ListVariant, schema: Variant|Schema, options: e.SerOptions?) -> (),
+	tuple: (self: ListVariant, func: (tuple: TupleVariant) -> ()) -> ListVariant,
 	dict: (self: ListVariant, func: (dict: DictVariant) -> ()) -> (),
 	list: (self: ListVariant, func: (list: ListVariant) -> ()) -> (),
 	
@@ -203,7 +260,7 @@ end
 
 local function isDictData(data: any): boolean
 	if type(data) ~= "table" then return false end
-	for k, v in ipairs(data) do return false end
+	--for k, v in ipairs(data) do return false end -- Allows numbers as keys
 	return true
 end
 
@@ -262,6 +319,7 @@ function this.serialization(self: Schema|Variant, options: SerOptions?): _SerOpt
 	local ver = this.versioning(self, options)
 	
 	return {
+		SkipSanitize = not not options.SkipSanitize,
 		Mode = options.Mode or "Flat" :: "Flat",
 		Compress = options.Compress,
 		Variant = ver.Variant,

@@ -2,6 +2,7 @@
 --!native
 
 local EncodingService = game:GetService("EncodingService")
+local DEFAULT_THRESHOLD = 128
 
 local w = require("@self/Types/Structs")
 local s = require("@self/Types/Type")
@@ -61,6 +62,10 @@ end
 
 local function compress(b: buffer, opts: t.Compression?): (buffer, number)
 	if not opts or not opts.Type then return b, 255 end
+	
+	local threshold = opts.Threshold or DEFAULT_THRESHOLD
+	if buffer.len(b) < threshold then return b, 255 end
+	
 	local succ, c = pcall(EncodingService.CompressBuffer,
 		EncodingService, b, opts.Type, opts.Level)
 
@@ -76,7 +81,7 @@ local HeaderCons = function(...)
 	for i, v in HeaderProps do
 		h[v] = args[i]
 	end
-	
+
 	return h
 end
 
@@ -87,7 +92,7 @@ local header = s.new("PayloadHeader", e.Sizes.BYTE, {
 	Compress = 255,
 	Variant = 1,
 	Engine = 1,
-	Mode = 1,
+	Mode = 1
 })
 
 function this.bytes(logi: Schematized, data: Data, options: _SerOptions): number

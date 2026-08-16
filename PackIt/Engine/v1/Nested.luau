@@ -61,18 +61,23 @@ end
 
 local function parserOptions(options: t.UnifiedEntryOptions?)
 	options = options or {} :: t.UnifiedEntryOptions
-	
-	local ser = copyDict(options.SerOptions :: any)
-	ser.Mode = "Nested"
+	local value = options.Values or options.Lenght
 
-	return {
-		tag = VERSION,
-		size = e.Sizes[options.Size :: any],
-		options = options :: t.UnifiedEntryOptions,
-		value = options.Values or options.Lenght or {
+	if (options :: any).Schema then
+		local ser = copyDict(options.SerOptions :: any)
+		ser.Mode = "Nested"
+
+		value = {
 			schema = (options :: any).Schema,
 			options = ser
 		}
+	end
+
+	return {
+		tag = VERSION,
+		value = value,
+		size = e.Sizes[options.Size :: any],
+		options = options :: t.UnifiedEntryOptions
 	}
 end
 
@@ -202,14 +207,12 @@ end
 
 function deser.list(logic: t.SchematizedList, b: buffer, offset: number): (t.ListData, number)
 	local count, offset = listHeader:Read(b, offset)
-	local data = {} :: t.ListData
+	local data = table.create(count or 0) :: t.ListData
 
 	if count <= 0 then return data, offset end
 	if type(logic.type) ~= "string" then
 		for i = 1, count do
-			local entry, off = deser.object(logic.type :: t.Schematized, b, offset)
-			table.insert(data, entry)
-			offset = off
+			data[i], offset = deser.object(logic.type :: t.Schematized, b, offset)
 		end
 
 		return data, offset
@@ -217,9 +220,7 @@ function deser.list(logic: t.SchematizedList, b: buffer, offset: number): (t.Lis
 
 	local opts = parserOptions(logic.options)
 	for i = 1, count do
-		local entry, off = t[logic.type]:Read(b, offset, opts :: any)
-		table.insert(data, entry)
-		offset = off
+		data[i], offset = t[logic.type]:Read(b, offset, opts :: any)
 	end
 
 	return data, offset

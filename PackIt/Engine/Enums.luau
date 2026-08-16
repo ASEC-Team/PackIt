@@ -212,6 +212,9 @@ sanitizers.HAS_NUMBER_SIZE = function(v, t, opt: {[string]: any})
 			error(`Value {v} out of range for {opt.Size} FLOAT`)
 		end
 		
+	elseif opt.Size ~= "QWORD" then
+		error(`Size {opt.Size} is not supported for FLOAT`)
+		
 	elseif math.abs(v) > float_limits[opt.Size] then
 		error(`Value {v} out of range for {opt.Size} FLOAT`)
 	end

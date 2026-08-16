@@ -40,6 +40,10 @@ function this.list(tag: string?, ...: string): Schema.ListVariant
 	return aliases(List.new(), tag, ...) :: Schema.ListVariant
 end
 
+function this.tuple(tag: string?, ...: string): Schema.TupleVariant
+	return aliases(Dict.new(true), tag, ...) :: Schema.TupleVariant
+end
+
 function this.get(tag: string): Schema.Variant
 	local s = schemas[tag]
 	assert(s, `Schema does not exists for tag {tag}`)

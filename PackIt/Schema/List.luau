@@ -15,11 +15,10 @@ local function setList(self: u.ListVariant, value: u.Variant|e.EntryType, option
 	}
 end
 
-local builds = {} -- Caches them to improve performance speed
 local function builLogicalSchema(self: u.ListVariant, variant: number): u.SchematizedList
-	local slug = `{self}|{variant}`
+	local base = u.getBase(self) :: u.ListSchema
 	
-	if builds[slug] then return builds[slug] end
+	if base._cache[variant] then return base._cache[variant] end
 	local logical: u.SchematizedList = { type = nil } :: any
 	local map = {}
 
@@ -28,7 +27,7 @@ local function builLogicalSchema(self: u.ListVariant, variant: number): u.Schema
 		logical = u.schematizeList(logical, map, var)
 	end
 
-	builds[slug] = logical
+	base._cache[variant] = logical
 	return logical
 end
 
@@ -82,7 +81,13 @@ function methods:Load(data: buffer|string|u.ListData, options: u.SerOptions?)
 	end
 
 	logi = builLogicalSchema(self, ser.Variant)
-	return u.sanitizeList(logi :: u.SchematizedList, data :: u.ListData, old ~= ser.Variant)
+	local diff = old ~= ser.Variant
+
+	if diff or not ser.SkipSanitize then
+		return u.sanitizeList(logi :: u.SchematizedList, data :: u.ListData, diff)
+	end
+	
+	return data :: u.ListData
 end
 
 -- Serializes the data to the versionings:
@@ -92,18 +97,20 @@ function methods:Serialize(data: u.ListData, options: u.SerOptions?): buffer
 	local ser = u.serialization(self, options)
 
 	local logi = builLogicalSchema(self, ser.Variant)
-	data = u.sanitizeList(logi, data)
+	data = ser.SkipSanitize and data
+		or u.sanitizeList(logi, data)
 
 	return e.serialize(logi, data, ser)
 end
 
 -- Deserializes the data
-function methods:Deserialize(data: buffer): (u.ListData, number)
+function methods:Deserialize(data: buffer, skipSanitize: boolean?): (u.ListData, number)
 	local var = e.getHeader(data).Variant
 	local logi = builLogicalSchema(self, var)
 	
 	local des = e.deserialize(logi, data) :: u.ListData
-	return u.sanitizeList(logi :: u.SchematizedList, des :: u.ListData), var
+	return skipSanitize and des or
+		u.sanitizeList(logi :: u.SchematizedList, des :: u.ListData), var
 end
 
 -- Returns the logical schema for the variant
@@ -117,7 +124,8 @@ function methods:Bytes(data: u.ListData, options: u.SerOptions?): number
 	local ser = u.serialization(self, options)
 
 	local logi = builLogicalSchema(self, ser.Variant)
-	data = u.sanitizeList(logi, data)
+	data = ser.SkipSanitize and data
+		or u.sanitizeList(logi, data)
 
 	return e.bytes(logi, data, ser)
 end
@@ -132,7 +140,7 @@ end
 -- Pre-generates the schema for each variant
 function methods:Build(): u.ListVariant
 	local base = u.getBase(self)
-	builds = {}
+	table.clear(base._cache)
 
 	for i=1, #base._variants, 1 do
 		builLogicalSchema(self, i)
@@ -152,7 +160,8 @@ local metatable = { __index = methods }
 
 function this.new(): u.ListVariant
 	local s = setmetatable({
-		_variants = {}
+		_variants = {},
+		_cache = {}
 
 	}, metatable)
 

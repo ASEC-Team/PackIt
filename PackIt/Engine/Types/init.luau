@@ -41,16 +41,19 @@ export type SchematizedList = {
 export type Mode = e.Mode
 export type Compression = {
 	Type: Enum.CompressionAlgorithm,
+	Threshold: number?,
 	Level: number?
 }
 	
 export type Serialization = {
+	SkipSanitize: boolean?,
 	Compress: Compression?,
 	Mode: Mode?
 }
 
 export type _SerOptions = _Versioning & Serialization
 export type SerOptions = { -- Type checker skill issues
+	SkipSanitize: boolean?,
 	Compress: Compression?,
 	Variant: number?,
 	Engine: number?,

@@ -93,9 +93,9 @@ function this.list(write: t.Write, read: t.Read, size: number, listLen: number, 
 	local wrapper, count = new(size, listLen)
 	
 	function wrapper.raw(values: {any}, options: t.ParserOptions)
-		local list = {}
+		local list = table.create(count or 0)
 		for i = 0, count -1 do
-			table.insert(list, round(values[i +1], options))
+			list[i +1] = round(values[i +1], options)
 		end
 		
 		return constructor(table.unpack(list))
@@ -111,11 +111,10 @@ function this.list(write: t.Write, read: t.Read, size: number, listLen: number, 
 	end
 	
 	function wrapper.read(b: buffer, offset: number, options: t.ParserOptions?)
-		local list = {}
+		local list = table.create(count or 0)
 		for i = 0, count -1 do
 			local res = read(b, offset +i *size, options)
-			local val = round(res, options, true)
-			table.insert(list, val)
+			list[i +1] = round(res, options, true)
 		end
 
 		return constructor(table.unpack(list))
@@ -128,10 +127,10 @@ function this.object(write: t.Write, read: t.Read, size: number, properties: {st
 	local wrapper, count = new(size, #properties)
 	
 	function wrapper.raw(value: any, options: t.ParserOptions?)
-		local list = {}
+		local list = table.create(count or 0)
 		for i = 0, count -1 do
-			table.insert(list, round(
-				value[properties[i +1]], options))
+			list[i +1] = round(value[
+				properties[i +1]], options)
 		end
 		
 		return constructor(table.unpack(list))
@@ -147,11 +146,10 @@ function this.object(write: t.Write, read: t.Read, size: number, properties: {st
 	end
 
 	function wrapper.read(b: buffer, offset: number, options: t.ParserOptions?)
-		local list = {}
+		local list = table.create(count or 0)
 		for i = 0, count -1 do
 			local res = read(b, offset +i *size)
-			local val = round(res, options, true)
-			table.insert(list, val)
+			list[i +1] = round(res, options, true)
 		end
 
 		return constructor(table.unpack(list))
@@ -313,14 +311,14 @@ function this.bits(write: t.Write, read: t.Read, size: number)
 	
 	function wrapper.read(b: buffer, offset: number): {boolean}
 		local packed = read(b, offset)
-		local result = {}
+		local result = table.create(bits or 0)
 
 		for i = 1, bits do
-			table.insert(result, bit32
-				.extract(packed, i -1, 1) == 1)
+			result[i] = bit32.extract(
+				packed, i -1, 1) == 1
 		end
 		
-		return result
+		return result :: any
 	end
 	
 	return wrapper
@@ -406,13 +404,12 @@ function this.uintHeader(write: t.Write, read: t.Read, size: number, properties:
 	
 	function wrapper.read(b: buffer, offset: number)
 		local count = read(b, offset)
-		local list = {}
+		local list = table.create(count or 0)
 		
 		for i = 1, count do
-			local res = read(b, offset +i *size)
-			table.insert(list, res)
+			list[i] = read(b, offset +i *size)
 		end
-
+		
 		return constructor(table.unpack(list)), count +size
 	end
 	
