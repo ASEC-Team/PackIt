@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#definitions-and-usages" class="md-skip">
+        <a href="#dictionaries-and-lists" class="md-skip">
           Skip to content
         </a>
       
@@ -459,10 +459,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#definitions-and-usages" class="md-nav__link">
+  <a href="#dictionaries-and-lists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Definitions and Usages
+        Dictionaries and Lists
       
     </span>
   </a>
@@ -470,10 +470,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#conclusions" class="md-nav__link">
+  <a href="#tuple-variants" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Conclusions
+        Tuple Variants
       
     </span>
   </a>
@@ -535,12 +535,10 @@
   
 
 
-  <h1>Samples</h1>
-
-<h2 id="definitions-and-usages"><strong>Definitions and Usages</strong></h2>
+<h2 id="dictionaries-and-lists"><strong>Dictionaries and Lists</strong></h2>
 <p>Let's gradually define a Player's data as an approach on how to use the framework.
 This is not an actual usage of player data</p>
-<p>We'll define a dictionray with Username and UserId for our Player.
+<p>We'll define a <a href="../API/#dict">dictionray</a> with Username and UserId for our Player.
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">dict</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">PackIt</span><span class="p">.</span><span class="nf">dict</span><span class="p">(</span><span class="s2">&quot;Player&quot;</span><span class="p">)</span>
 
 <span class="nv">dict</span><span class="p">:</span><span class="nc">varchar</span><span class="p">(</span><span class="s2">&quot;Username&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">-- BYTE Lenght string</span>
@@ -549,14 +547,18 @@ This is not an actual usage of player data</p>
 <span class="nv">dict</span><span class="p">:</span><span class="nc">Build</span><span class="p">()</span>
 </code></pre></div></p>
 <hr />
-<p>We now want to make the player own a list of items, so we are going to define a list of items ids inside it. Since we are appending to the bottom of the dictionary we dont have to make a new variant. Works for nested dicts aswell with Nested serialization mode.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">dict</span><span class="p">:</span><span class="nc">list</span><span class="p">(</span><span class="s2">&quot;Items&quot;</span><span class="p">,</span><span class="w"> </span><span class="kr">function</span><span class="p">(</span><span class="nv">list</span><span class="p">)</span>
-<span class="w">    </span><span class="nv">list</span><span class="p">:</span><span class="nc">id</span><span class="p">()</span><span class="w"> </span><span class="c1">-- {Positive float64}</span>
+<p>We now want to make the player own a list of items, so we are going to define a <a href="../API/#structural-nested-types">list</a> of items ids inside it. Since we are appending to the bottom of the dictionary we dont have to make a new variant. Works for nested dicts aswell with Nested serialization mode.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">dict</span><span class="p">:</span><span class="nc">list</span><span class="p">(</span><span class="s2">&quot;Items&quot;</span><span class="p">,</span><span class="w"> </span><span class="kr">function</span><span class="p">(</span><span class="nv">list</span><span class="p">)</span><span class="w"> </span><span class="c1">-- {Positive float64}</span>
+<span class="w">    </span><span class="nv">list</span><span class="p">:</span><span class="nc">id</span><span class="p">({</span>
+<span class="w">        </span><span class="nv">Sanitizers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">-- Positive check is builtin in the type, custom example:</span>
+<span class="w">            </span><span class="kr">function</span><span class="p">(</span><span class="nv">v</span><span class="p">,</span><span class="w"> </span><span class="nv">t</span><span class="p">)</span><span class="w"> </span><span class="nf">assert</span><span class="p">(</span><span class="nv">v</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Invalid Id&quot;</span><span class="p">)</span><span class="w"> </span><span class="kr">end</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">})</span>
 
 <span class="kr">end</span><span class="p">):</span><span class="nc">Build</span><span class="p">()</span>
 </code></pre></div>
 <hr />
-<p>Now we want to associate a price to each item (max <strong>~42 mil</strong> and defaults to 0, can have <strong>2 digit decimals</strong>), we want to change old list to include it without corrupting previous data, so we are going to use versioning.
+<p>Now we want to associate a price to each item (max <strong>~42 mil</strong> and defaults to 0, can have <strong>2 digit decimals</strong>), we want to change old list to include it without corrupting previous data, so we are going to use <a href="../API/#variant">versioning</a>.
 (Migration must be handled somewhere in this case)</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">dict</span><span class="p">:</span><span class="nc">Variant</span><span class="p">()</span>
 
@@ -574,7 +576,7 @@ This is not an actual usage of player data</p>
 <span class="nv">variant</span><span class="p">:</span><span class="nc">Build</span><span class="p">()</span>
 </code></pre></div>
 <hr />
-<p>Now we want to have a list of players. This example doesnt really need nested mode as there is no nested dictionary in another dictionary yet.</p>
+<p>To create a list of players, you can pass the existing <a href="../API/#structural-nested-types">schema</a> directly to a list container. Keep in mind that reusing an external schema adds a small amount of overhead compared to an inline schema definition. This example doesnt really need nested mode as there is no nested dictionary in another dictionary yet.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nv">Mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Nested&quot;</span><span class="w"> </span><span class="c1">-- &quot;Flat&quot; by default</span>
 <span class="w">    </span><span class="c1">-- Do not use Compress in sub-schemas</span>
@@ -587,14 +589,14 @@ This is not an actual usage of player data</p>
 <span class="nv">list</span><span class="p">:</span><span class="nc">Build</span><span class="p">()</span><span class="w"> </span><span class="c1">-- dict is logically equivalent to variant</span>
 </code></pre></div>
 <hr />
-<p>Lets now Serialize and Load the data.</p>
+<p>Lets now <a href="../API/#serialize">Serialize</a> and <a href="../API/#load">Load</a> the data.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nv">Compress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nv">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">Enum</span><span class="p">.</span><span class="nv">CompressionAlgorithm</span><span class="p">.</span><span class="nv">Zstd</span><span class="w"> </span><span class="p">},</span>
 <span class="w">    </span><span class="nv">Mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Nested&quot;</span>
 <span class="p">}</span>
 
 <span class="kd">local</span><span class="w"> </span><span class="nv">versioning</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nv">Variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="c1">-- Highest by default</span>
+<span class="w">    </span><span class="c1">-- Variant = 1 (Highest by default)</span>
 <span class="p">}</span>
 
 <span class="kd">local</span><span class="w"> </span><span class="nv">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">list</span><span class="p">:</span><span class="nc">Template</span><span class="p">(</span><span class="nv">versioning</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Generates mock data</span>
@@ -602,8 +604,35 @@ This is not an actual usage of player data</p>
 <span class="kd">local</span><span class="w"> </span><span class="nv">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">list</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nb">buffer</span><span class="p">,</span><span class="w"> </span><span class="nv">versioning</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Deserialized data</span>
 </code></pre></div>
 <hr />
-<h2 id="conclusions"><strong>Conclusions</strong></h2>
-<p>This schema resulted ~60% smaller than json in flat mode on 10 users with 1-5 items each</p>
+<h1 id="tuple-variants">Tuple Variants</h1>
+<p>Although <a href="../API/#tuple">Tuples</a> are effectively <a href="../API/#dict">dictionaries</a> that use numeric indexes as keys, their manipulation is handled differently than standard dictionaries or lists.</p>
+<p>Consider a tuple describing an item's <strong>Name</strong>, <strong>Quantity</strong>, and <strong>Price</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">tuple</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">PackIt</span><span class="p">.</span><span class="nf">tuple</span><span class="p">()</span>
+
+<span class="nv">tuple</span><span class="p">:</span><span class="nc">varchar</span><span class="p">()</span><span class="w"> </span><span class="c1">-- Index 1: Name</span>
+<span class="w">    </span><span class="p">:</span><span class="nc">uint</span><span class="p">()</span><span class="w">     </span><span class="c1">-- Index 2: Quantity</span>
+<span class="w">    </span><span class="p">:</span><span class="nc">uint</span><span class="p">()</span><span class="w">     </span><span class="c1">-- Index 3: Price</span>
+
+<span class="nv">tuple</span><span class="p">:</span><span class="nc">Build</span><span class="p">()</span>
+</code></pre></div>
+<p>Now, suppose we want to create a variant that modifies the numeric size of <strong>Quantity</strong> and <strong>Price</strong> without overriding the <strong>Name</strong> field. </p>
+<p>We can pass an <code>Index</code> within the <a href="../API/#tuple-options">Tuple field Options</a> to explicitly target specific positions:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">variant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">tuple</span><span class="p">:</span><span class="nc">Variant</span><span class="p">()</span>
+
+<span class="nv">variant</span><span class="p">:</span><span class="nc">uint</span><span class="p">({</span><span class="w">      </span><span class="c1">-- Quantity</span>
+<span class="w">    </span><span class="nv">Size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Word&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nv">Index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w">      </span><span class="c1">-- Target index 2 explicitly</span>
+<span class="p">}):</span><span class="nc">uint</span><span class="p">({</span><span class="w">           </span><span class="c1">-- Price</span>
+<span class="w">    </span><span class="nv">Size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;DWORD&quot;</span><span class="w">  </span><span class="c1">-- Index automatically increments to 3</span>
+<span class="p">})</span>
+
+<span class="nv">variant</span><span class="p">:</span><span class="nc">Build</span><span class="p">()</span>
+</code></pre></div>
+<p>Finally, we can construct template mock data, serialize it, and deserialize the resulting buffer:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">variant</span><span class="p">:</span><span class="nc">Template</span><span class="p">(</span><span class="nv">versioning</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Generates mock data -&gt; (&quot;&quot;, 0, 0)</span>
+<span class="kd">local</span><span class="w"> </span><span class="nb">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">variant</span><span class="p">:</span><span class="nc">Serialize</span><span class="p">(</span><span class="nv">template</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">)</span>
+<span class="kd">local</span><span class="w"> </span><span class="nv">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">variant</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nb">buffer</span><span class="p">,</span><span class="w"> </span><span class="nv">versioning</span><span class="p">)</span><span class="w"> </span><span class="c1">-- Deserialized data</span>
+</code></pre></div>
 
 
 

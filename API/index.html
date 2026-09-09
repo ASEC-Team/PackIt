@@ -470,6 +470,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#tuple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .tuple()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -705,13 +716,14 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Entries">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#entry" class="md-nav__link">
+  <a href="#entry-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Entry
+        Entry Options
       
     </span>
   </a>
@@ -719,10 +731,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#lentry-length-options" class="md-nav__link">
+  <a href="#lenght-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        LEntry (Length Options)
+        Lenght Options
       
     </span>
   </a>
@@ -730,13 +742,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#enumoptions" class="md-nav__link">
+  <a href="#enum-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        EnumOptions
+        Enum Options
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tuple-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tuple Options
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -901,6 +929,32 @@ Instantiates a new list-based <code>Schema</code>.</p>
 </ul>
 <p><strong>Returns:</strong> A <code>Schema</code> object configured for array/list structures.</p>
 <hr />
+<h3 id="tuple"><code>.tuple()</code></h3>
+<p><div class="highlight"><pre><span></span><code><span class="nv">Packit</span><span class="p">.</span><span class="nf">tuple</span><span class="p">(</span><span class="nv">tag</span><span class="p">:</span><span class="w"> </span><span class="nc">string</span><span class="err">?</span><span class="p">,</span><span class="w"> </span><span class="p">...:</span><span class="w"> </span><span class="nc">string</span><span class="p">):</span><span class="w"> </span><span class="nc">Schema</span>
+</code></pre></div>
+Instantiates a new tuple-based <code>Schema</code>.</p>
+<p>Derived from the <a href="#dict">Dict Schema</a>, uses indexes as keys and a specialized builder for schemas and variants.</p>
+<div class="admonition info">
+<p class="admonition-title">Alternative Tuple Using Dictionaries</p>
+<p>Tuples can also be emulated using <code>PackIt.dict()</code> by passing numeric indexes as keys instead of strings.
+This does not benefit of <a href="#tuple-options">Tuple Options</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PackIt</span><span class="p">.</span><span class="nf">dict</span><span class="p">():</span><span class="nc">varchar</span><span class="p">(</span><span class="mf">1</span><span class="p">):</span><span class="nc">uint</span><span class="p">(</span><span class="mf">2</span><span class="p">):</span><span class="nc">uint</span><span class="p">(</span><span class="mf">3</span><span class="p">)</span><span class="w"> </span><span class="c1">--&gt; (&quot;Banana&quot;, 3, 1) --&gt; 3 bananas for 1$</span>
+</code></pre></div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Alternative Tuple Using Lists</p>
+<p>Tuples can also be emulated using <code>PackIt.list()</code> with <code>:auto()</code> datatype.<br>
+This creates extra overhead per-argument but can be usefull in some cases, does not benefit of <a href="#tuple-options">Tuple Options</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PackIt</span><span class="p">.</span><span class="nf">list</span><span class="p">():</span><span class="nc">auto</span><span class="p">()</span><span class="w"> </span><span class="c1">--&gt; (...any)</span>
+</code></pre></div>
+</div>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>tag</code> <em>(string, optional)</em>: A unique identifier for the schema. If provided, the schema is registered globally and can be retrieved across different scripts using <code>Packit.get(tag)</code>.</li>
+<li><code>...</code> <em>(string, optional)</em>: A list of optional alias names that can also be used to query this schema.</li>
+</ul>
+<p><strong>Returns:</strong> A <code>Schema</code> object configured for heterogeneous list structures.</p>
+<hr />
 <h3 id="get"><code>.get()</code></h3>
 <p><div class="highlight"><pre><span></span><code><span class="nv">Packit</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nv">tag</span><span class="p">:</span><span class="w"> </span><span class="nc">string</span><span class="p">):</span><span class="w"> </span><span class="nc">Schema</span><span class="err">?</span>
 </code></pre></div>
@@ -914,7 +968,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <h2 id="schema-variant">Schema &amp; Variant</h2>
 <p>The following methods are valid for both Dictionary and List Schemas, as well as their respective Variants.</p>
 <h3 id="build"><code>:Build()</code></h3>
-<p><strong>Dictionary &amp; List Schema Syntax:</strong>
+<p><strong>Schemas Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Build</span><span class="p">():</span><span class="w"> </span><span class="nc">Schema</span>
 </code></pre></div></p>
 <p>Precomputes and compiles the internal logical structures of the schema and all its configured variants to optimize runtime serialization and deserialization pipelines.</p>
@@ -934,12 +988,16 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Returns</strong> <code>Schema</code>: Returns the current schema instance (<code>self</code>), allowing for clean method chaining during initialization.</p>
 <h3 id="load"><code>:Load()</code></h3>
 <p><strong>Dictionary Schema Syntax:</strong>
-<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">DictData</span>
+<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">DictData</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
-<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">ListData</span>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
+<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Load</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">ListData</span>
 </code></pre></div></p>
 <p>Parses, sanitizes, and normalizes the provided data structure according to the target schema or variant configuration.</p>
+<div class="admonition info">
+<p class="admonition-title">Behavior &amp; Performance Optimization</p>
+<p>Setting <code>SkipSanitize</code> to <code>true</code> in <code>options</code> reduces load times by up to <strong>50%</strong>. Note that sanitization will still occur automatically for legacy data that requires merging with newer variants. Use this flag when working with trusted data payloads where all required fields are guaranteed and schema validation is unnecessary.</p>
+</div>
 <ul>
 <li><strong>Input Mutability:</strong> Accepts both raw serialized <code>buffer</code> formats and unencoded data tables (<code>DictData</code> / <code>ListData</code>).</li>
 <li><strong>Version Interoperability:</strong> Automatically detects and upgrades the payload structure regardless of legacy data versions, unless specific migration rules are overridden in the configuration options.</li>
@@ -947,7 +1005,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>data</code> <em>(buffer | DictData | ListData)</em>: The raw buffer payload or data table to be processed.</li>
-<li><code>options</code> <em>(<a href="#versioning">Versioning</a>, optional)</em>: Configuration settings governing output data structure versioning. Defaults to the latest available variant if omitted.</li>
+<li><code>options</code> <em>(<a href="#serialization">Serialization</a>, optional)</em>: Configuration settings governing output data structure versioning and used pipelines. Defaults to the latest available variant if omitted.</li>
 </ul>
 <p><strong>Returns</strong> <code>(DictData | ListData?)</code>: The fully parsed, sanitized, and normalized data structure.</p>
 <hr />
@@ -955,9 +1013,13 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Dictionary Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Serialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">buffer</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Serialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">buffer</span>
 </code></pre></div></p>
+<div class="admonition tip">
+<p class="admonition-title">Performance Optimization</p>
+<p>Setting <code>SkipSanitize</code> to <code>true</code> in <code>options</code> reduces serialization times by up to <strong>50%</strong>. Use this flag when working with trusted data payloads that contain all required fields and do not require schema validation.</p>
+</div>
 <p>Encodes and packs the provided runtime data structure into a highly optimized binary stream. The resulting layout dynamically adapts to the selected serialization engine, structure layout mode, and compression algorithms, embedding all metadata necessary for fault-tolerant deserialization directly within the payload.</p>
 <ul>
 <li><strong>Target Variant Selection:</strong> By default, compiles the data structural layout using the highest available schema variant version to ensure forward-compatible writing.</li>
@@ -972,12 +1034,16 @@ Retrieves a previously registered schema from the global registry using its defi
 <hr />
 <h3 id="deserialize"><code>:Deserialize()</code></h3>
 <p><strong>Dictionary Schema Syntax:</strong>
-<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Deserialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="p">):</span><span class="w"> </span><span class="p">(</span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nc">number</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Deserialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="p">,</span><span class="w"> </span><span class="nv">skipSanitize</span><span class="p">:</span><span class="w"> </span><span class="nc">boolean</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="p">(</span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nc">number</span><span class="p">)</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
-<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Deserialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="p">):</span><span class="w"> </span><span class="p">(</span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nc">number</span><span class="p">)</span>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
+<div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Deserialize</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">buffer</span><span class="p">,</span><span class="w"> </span><span class="nv">skipSanitize</span><span class="p">:</span><span class="w"> </span><span class="nc">boolean</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="p">(</span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nc">number</span><span class="p">)</span>
 </code></pre></div></p>
 <p>Decodes a raw binary stream back into its runtime table representation exactly as it was written, without applying any automated data migration or structural upgrading, sanitization is applied anyway.</p>
+<div class="admonition tip">
+<p class="admonition-title">Performance Optimization</p>
+<p>Passing <code>skipSanitize</code> as <code>true</code> reduces deserialization times by up to <strong>50%</strong>. Use this flag when working with trusted data payloads that contain all required fields and do not require schema validation.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Usage Recommendation: Prefer <code>:Load()</code></p>
 <p>For standard workflow scenarios, it is highly recommended to use <strong><a href="#load"><code>:Load()</code></a></strong> instead of <code>:Deserialize()</code>. While <code>:Load()</code> automatically handles version upgrades and structural normalization to the latest schema variant, <code>:Deserialize()</code> strictly outputs the data in the exact historical version it was originally serialized to.</p>
@@ -987,7 +1053,12 @@ Retrieves a previously registered schema from the global registry using its defi
 </ul>
 <p><strong>Parameters</strong></p>
 <ul>
-<li><code>data</code> <em>(buffer)</em>: The compact binary stream to be deserialized.</li>
+<li>
+<p><code>data</code> <em>(buffer)</em>: The compact binary stream to be deserialized.</p>
+</li>
+<li>
+<p><code>SkipSanitize</code><em> </em>(boolean, optional)* Skips the sanitization pipeline.</p>
+</li>
 </ul>
 <p><strong>Returns</strong></p>
 <ul>
@@ -996,7 +1067,7 @@ Retrieves a previously registered schema from the global registry using its defi
 </ul>
 <hr />
 <h3 id="variant"><code>:Variant()</code></h3>
-<p><strong>Dictionary &amp; List Schema Syntax:</strong>
+<p><strong>Schemas Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Variant</span><span class="p">(</span><span class="nv">version</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">Variant</span>
 </code></pre></div></p>
 <p>Instantiates a new schema variant, allowing for backward-compatible structural iterations, incremental property additions, or type overrides on an existing schema configuration.</p>
@@ -1018,7 +1089,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Dictionary Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Template</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">,</span><span class="w"> </span><span class="nv">lists</span><span class="p">:</span><span class="w"> </span><span class="nc">boolean</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">DictData</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Template</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">,</span><span class="w"> </span><span class="nv">lists</span><span class="p">:</span><span class="w"> </span><span class="nc">boolean</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">ListData</span>
 </code></pre></div></p>
 <p>Generates a fully initialized boilerplate data table pre-populated with default values and conforming precisely to the specified schema variant configuration.</p>
@@ -1041,7 +1112,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Dictionary Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Logic</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">SchematizedDict</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Logic</span><span class="p">(</span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Versioning</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">SchematizedList</span>
 </code></pre></div></p>
 <p>Exposes and extracts the underlying logical layout map of the schema compiled for the targeted structural variant version.</p>
@@ -1063,13 +1134,17 @@ Retrieves a previously registered schema from the global registry using its defi
 <p><strong>Dictionary Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Bytes</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">DictData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">number</span>
 </code></pre></div></p>
-<p><strong>List Schema Syntax:</strong>
+<p><strong>List &amp; Tuple Schema Syntax:</strong>
 <div class="highlight"><pre><span></span><code><span class="nv">Schema</span><span class="p">:</span><span class="nc">Bytes</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span><span class="w"> </span><span class="nc">ListData</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">:</span><span class="w"> </span><span class="nc">Serialization</span><span class="err">?</span><span class="p">):</span><span class="w"> </span><span class="nc">number</span>
 </code></pre></div></p>
 <p>Calculates and returns the exact buffer payload size required to serialize the provided runtime data structure.</p>
 <div class="admonition note">
 <p class="admonition-title">Important Note: Roblox Buffer Compression Exclusion</p>
 <p>The byte count returned by this method represents the uncompressed size calculated according to the internal serialization engine. It does not account for roblox buffer compression layer.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Performance Optimization</p>
+<p>Setting <code>SkipSanitize</code> to <code>true</code> in <code>options</code> drastically reduces the processing for this function. Use this flag when working with trusted data payloads that contain all required fields and do not require schema validation.</p>
 </div>
 <ul>
 <li><strong>Layout Profiling:</strong> Simulates structural layout packing relative to the selected serialization engine, configuration mode, and active schema variant to compute precise byte footprints.</li>
@@ -1092,13 +1167,14 @@ Retrieves a previously registered schema from the global registry using its defi
 <div class="admonition info">
 <p class="admonition-title">Allocation Baseline: Minimum Sizing Defaults</p>
 <p>By default, all primitive, numeric, and scalar types initialize and build their layouts starting from their lowest possible allocable byte size. </p>
-<p>If your application needs to handle larger numeric ranges, longer structural strings, or higher-capacity byte boundaries, you <strong>must</strong> explicitly define and configure these limits inside the type's optional configuration block (such as specifying parameters within <a href="#entry">Entry</a>, <a href="#lentry">LEntry</a>, or <a href="#eentry">EEntry</a>). Leaving options omitted locks the property to its tightest, most memory-optimized footprint.</p>
+<p>If your application needs to handle larger numeric ranges, longer structural strings, or higher-capacity byte boundaries, you <strong>must</strong> explicitly define and configure these limits inside the type's optional configuration block (such as specifying parameters within <a href="#entry-options">Entry Options</a>, <a href="#lenght-options">Lenght Options</a>, or <a href="#enum-options">Enum Options</a>). Leaving options omitted locks the property to its tightest, most memory-optimized footprint.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Syntax Variation</p>
 <ul>
 <li><strong><code>DictVariant</code> Methods:</strong> Require an explicit <code>key: string</code> identifier and return <code>DictVariant</code> (<code>self</code>) to allow method chaining.</li>
 <li><strong><code>ListVariant</code> Methods:</strong> Direct value allocations within arrays; they do not accept a key parameter and return <code>()</code> (void).</li>
+<li><strong><code>TupleVariant</code> Methods:</strong> Do not accept key parameters and return <code>TupleVariant</code> (<code>self</code>) to allow method chaining.</li>
 </ul>
 </div>
 <hr />
@@ -1108,8 +1184,8 @@ Retrieves a previously registered schema from the global registry using its defi
 <thead>
 <tr>
 <th style="text-align: left;">Method</th>
-<th style="text-align: left;"><code>DictVariant</code> Syntax</th>
-<th style="text-align: left;"><code>ListVariant</code> Syntax</th>
+<th style="text-align: left;"><code>Dict</code> Syntax</th>
+<th style="text-align: left;"><code>List</code> &amp; <code>Tuple</code> Syntax</th>
 <th style="text-align: left;">Description</th>
 </tr>
 </thead>
@@ -1132,6 +1208,12 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><code>:list(callback)</code></td>
 <td style="text-align: left;">Creates an inline sub-list array, passing a temporary <code>ListVariant</code> to the callback configuration function.</td>
 </tr>
+<tr>
+<td style="text-align: left;"><strong><code>tuple</code></strong></td>
+<td style="text-align: left;"><code>:tuple(key, callback)</code></td>
+<td style="text-align: left;"><code>:tuple(callback)</code></td>
+<td style="text-align: left;">Creates an inline heterogeneous list, passing a temporary <code>TupleVariant</code> to the callback configuration function.</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition warning">
@@ -1146,8 +1228,8 @@ Retrieves a previously registered schema from the global registry using its defi
 <thead>
 <tr>
 <th style="text-align: left;">Method</th>
-<th style="text-align: left;"><code>DictVariant</code> Call Syntax</th>
-<th style="text-align: left;"><code>ListVariant</code> Call Syntax</th>
+<th style="text-align: left;"><code>Dict</code> Syntax</th>
+<th style="text-align: left;"><code>List</code> &amp; <code>Tuple</code> Syntax</th>
 <th style="text-align: left;">Configuration Reference</th>
 <th style="text-align: left;">Description</th>
 </tr>
@@ -1157,56 +1239,56 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>bool</code></strong></td>
 <td style="text-align: left;"><code>:bool(key, options?)</code></td>
 <td style="text-align: left;"><code>:bool(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE</code></td>
 <td style="text-align: left;">Standard true/false boolean payload.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>bits</code></strong></td>
 <td style="text-align: left;"><code>:bits(key, options?)</code></td>
 <td style="text-align: left;"><code>:bits(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Bitmask layout configuration, boolean array</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>char</code></strong></td>
 <td style="text-align: left;"><code>:char(key, options)</code></td>
 <td style="text-align: left;"><code>:char(options)</code></td>
-<td style="text-align: left;"><a href="#lentry">LEntry</a><br><code>Size: BYTE</code></td>
+<td style="text-align: left;"><a href="#lenght-options">Lenght Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE</code></td>
 <td style="text-align: left;">Fixed-length text value string layout.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>varchar</code></strong></td>
 <td style="text-align: left;"><code>:varchar(key, options?)</code></td>
 <td style="text-align: left;"><code>:varchar(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Variable-length text value string serialization.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>buffer</code></strong></td>
 <td style="text-align: left;"><code>:buffer(key, options?)</code></td>
 <td style="text-align: left;"><code>:buffer(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Raw data buffer payload stream embedded directly into the schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>enum</code></strong></td>
 <td style="text-align: left;"><code>:enum(key, options)</code></td>
 <td style="text-align: left;"><code>:enum(options)</code></td>
-<td style="text-align: left;"><a href="#eentry">EEntry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#enum-options">Enum Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Maps an enumerated value, EnumItem, string or number.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>id</code></strong></td>
 <td style="text-align: left;"><code>:id(key, options?)</code></td>
 <td style="text-align: left;"><code>:id(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: QWORD</code></td>
 <td style="text-align: left;">A unique identifier tracking reference value, comparable to a positive float64.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>auto</code></strong></td>
 <td style="text-align: left;"><code>:auto(key, options?)</code></td>
 <td style="text-align: left;"><code>:auto(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a></td>
 <td style="text-align: left;">Dynamic on-demand inference mapping engine based on incoming value types.</td>
 </tr>
 </tbody>
@@ -1218,8 +1300,8 @@ Retrieves a previously registered schema from the global registry using its defi
 <thead>
 <tr>
 <th style="text-align: left;">Method</th>
-<th style="text-align: left;"><code>DictVariant</code> Call Syntax</th>
-<th style="text-align: left;"><code>ListVariant</code> Call Syntax</th>
+<th style="text-align: left;"><code>Dict</code> Syntax</th>
+<th style="text-align: left;"><code>List</code> &amp; <code>Tuple</code> Syntax</th>
 <th style="text-align: left;">Configuration Reference</th>
 <th style="text-align: left;">Description</th>
 </tr>
@@ -1229,28 +1311,28 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>number</code></strong></td>
 <td style="text-align: left;"><code>:number(key, options?)</code></td>
 <td style="text-align: left;"><code>:number(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Standard runtime floating-point or generic numeric scaling allocation. <strong>Allows nan and inf.</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>float</code></strong></td>
 <td style="text-align: left;"><code>:float(key, options?)</code></td>
 <td style="text-align: left;"><code>:float(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Floating point binary layout.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>int</code></strong></td>
 <td style="text-align: left;"><code>:int(key, options?)</code></td>
 <td style="text-align: left;"><code>:int(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Signed runtime integer scalar format.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uint</code></strong></td>
 <td style="text-align: left;"><code>:uint(key, options?)</code></td>
 <td style="text-align: left;"><code>:uint(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Unsigned runtime integer scalar layout format.</td>
 </tr>
 </tbody>
@@ -1262,8 +1344,8 @@ Retrieves a previously registered schema from the global registry using its defi
 <thead>
 <tr>
 <th style="text-align: left;">Method</th>
-<th style="text-align: left;"><code>DictVariant</code> Call Syntax</th>
-<th style="text-align: left;"><code>ListVariant</code> Call Syntax</th>
+<th style="text-align: left;"><code>DictV</code> Syntax</th>
+<th style="text-align: left;"><code>List</code> &amp; <code>Tuple</code> Syntax</th>
 <th style="text-align: left;">Configuration Reference</th>
 <th style="text-align: left;">Description</th>
 </tr>
@@ -1273,56 +1355,56 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>numberVec2</code></strong></td>
 <td style="text-align: left;"><code>:numberVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:numberVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">number</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>floatVec2</code></strong></td>
 <td style="text-align: left;"><code>:floatVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:floatVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">float</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>intVec2</code></strong></td>
 <td style="text-align: left;"><code>:intVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:intVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">int</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uintVec2</code></strong></td>
 <td style="text-align: left;"><code>:uintVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:uintVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">uint</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>numberVec3</code></strong></td>
 <td style="text-align: left;"><code>:numberVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:numberVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">number</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>floatVec3</code></strong></td>
 <td style="text-align: left;"><code>:floatVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:floatVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">float</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>intVec3</code></strong></td>
 <td style="text-align: left;"><code>:intVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:intVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">int</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uintVec3</code></strong></td>
 <td style="text-align: left;"><code>:uintVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:uintVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">uint</a></td>
 </tr>
 </tbody>
@@ -1334,8 +1416,8 @@ Retrieves a previously registered schema from the global registry using its defi
 <thead>
 <tr>
 <th style="text-align: left;">Method</th>
-<th style="text-align: left;"><code>DictVariant</code> Call Syntax</th>
-<th style="text-align: left;"><code>ListVariant</code> Call Syntax</th>
+<th style="text-align: left;"><code>Dict</code> Syntax</th>
+<th style="text-align: left;"><code>List</code> &amp; <code>Tuple</code> Syntax</th>
 <th style="text-align: left;">Configuration Reference</th>
 <th style="text-align: left;">Description</th>
 </tr>
@@ -1345,28 +1427,28 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>brickcolor</code></strong></td>
 <td style="text-align: left;"><code>:brickcolor(key, options?)</code></td>
 <td style="text-align: left;"><code>:brickcolor(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: WORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: WORD</code></td>
 <td style="text-align: left;">Serializes a Roblox <code>BrickColor</code> asset token cleanly into memory.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>color3</code></strong></td>
 <td style="text-align: left;"><code>:color3(key, options?)</code></td>
 <td style="text-align: left;"><code>:color3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: BYTE</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE</code></td>
 <td style="text-align: left;">Standard Roblox <code>Color3</code> RGB color representation format.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>cframe</code></strong></td>
 <td style="text-align: left;"><code>:cframe(key, options?)</code></td>
 <td style="text-align: left;"><code>:cframe(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Full allocation for <code>CFrame</code>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>lcframe</code></strong></td>
 <td style="text-align: left;"><code>:lcframe(key, options?)</code></td>
 <td style="text-align: left;"><code>:lcframe(options?)</code></td>
-<td style="text-align: left;"><a href="#entry">Entry</a><br><code>Size: DWORD | QWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: DWORD | QWORD</code></td>
 <td style="text-align: left;">Light-weight variant for <code>CFrame</code>.</td>
 </tr>
 </tbody>
@@ -1399,12 +1481,17 @@ Retrieves a previously registered schema from the global registry using its defi
 <h3 id="serialization"><code>Serialization</code></h3>
 <p>The <code>Serialization</code> configuration object dictates explicit layout compilation, structural format modes, and performance optimization flags applied during the binary serialization process.</p>
 <div class="highlight"><pre><span></span><code><span class="kr">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nc">Serialization</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nc">SkipSanitize</span><span class="p">:</span><span class="w"> </span><span class="nc">boolean</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Compress</span><span class="p">:</span><span class="w"> </span><span class="nc">Compression</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Variant</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Engine</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Mode</span><span class="p">:</span><span class="w"> </span><span class="nc">Mode</span><span class="err">?</span>
 <span class="p">}</span>
 </code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Performance Optimization</p>
+<p>Setting <code>SkipSanitize</code> to <code>true</code> reduces processing duration by up to <strong>50%</strong>. Use this flag when working with trusted data payloads that contain all required fields and do not require schema validation.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Inherited Behavior &amp; Fallbacks</p>
 <p>The <code>Variant</code> and <code>Engine</code> fields behave identically to those defined in the <strong><a href="#versioning"><code>Versioning</code></a></strong> type block. If any optional configuration parameter is omitted, the framework automatically targets the highest available production defaults (latest variant version, highest engine tier, flat packing mode, and uncompressed stream profiles).</p>
@@ -1416,15 +1503,16 @@ Retrieves a previously registered schema from the global registry using its defi
 <li><code>Nested</code>: Isolates individual dictionaries with distinct structural boundaries, allocating space for new properties to be appended to any nested object layer. This layout is highly optimized for persistent data stores that continuously evolve over time.</li>
 </ul>
 <p><strong><code>Compress</code></strong> <em>(<a href="#compression">Compression</a>, optional)</em> Defines the downstream compression strategy or threshold layer applied to the binary stream.</p>
+<p><strong><code>SkipSanitize</code></strong> <em>(boolean, optional)</em> Skips the sanitization pipeline unless you are loading legacy data via <code>:Load()</code> that requires merging with the latest available variant.</p>
 <p><strong><code>Variant</code></strong> <em>(number, optional)</em> from <a href="#versioning"><code>Versioning</code></a>.</p>
 <p><strong><code>Engine</code></strong> <em>(number, optional)</em> from <a href="#versioning"><code>Versioning</code></a>.</p>
 <hr />
 <h3 id="entries"><code>Entries</code></h3>
 <p>These type configurations define how primitive properties, string layouts, and enumeration indices allocate memory boundaries and sanitize incoming payload data.</p>
 <hr />
-<h3 id="entry"><code>Entry</code></h3>
+<h4 id="entry-options"><code>Entry Options</code></h4>
 <p>The primary baseline configuration tracking numeric ranges, sanitization, scaling boundaries, and precision adjustments.</p>
-<div class="highlight"><pre><span></span><code><span class="kr">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nc">EntryOptions</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="kr">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nc">Entry</span><span class="w"> </span><span class="nc">OptionsOptions</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nc">Sanitizers</span><span class="p">:</span><span class="w"> </span><span class="nc">Sanitizers</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Round</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Default</span><span class="p">:</span><span class="w"> </span><span class="nc">any</span><span class="err">?</span><span class="p">,</span>
@@ -1433,26 +1521,39 @@ Retrieves a previously registered schema from the global registry using its defi
 </code></pre></div>
 <p><strong>Fields</strong></p>
 <p><strong><code>Sanitizers</code></strong> <em>(<a href="#sanitizers">Sanitizers</a>, optional)</em>: A processing pipeline invoked to clean or adjust the incoming value.</p>
-<p><strong><code>Round</code></strong> <em>(number, optional)</em>: Clamps values or targets specific floating-point decimal precision boundaries before storage operations.</p>
+<p><strong><code>Round</code></strong> <em>(number, optional)</em>: Specifies a decimal precision scale multiplier. It converts floating-point decimals into integers during serialization by multiplying the value (and divides it back upon deserialization). This allows you to store precise decimal values inside compact integer layouts (like <code>uint</code> or <code>int</code>), bypassing heavy float footprints.</p>
 <p><strong><code>Default</code></strong> <em>(any, optional)</em>: The initial or placeholder value assigned if no runtime input is supplied.</p>
 <p><strong><code>Size</code></strong> <em>(<a href="#sizes">Sizes</a>, optional)</em>: Dictates the primitive bit-budget footprint. Defaults to the minimum allocable layer if omitted.</p>
 <hr />
-<h3 id="lentry-length-options"><code>LEntry</code> <em>(Length Options)</em></h3>
+<h4 id="lenght-options"><code>Lenght Options</code></h4>
 <p>Configures explicit, fixed-length allocation structures—primarily utilized by strict char array boundaries (<code>:char</code>).</p>
 <p><strong>Fields</strong></p>
-<p><strong><code>Fields</code></strong> inherited from <a href="#entry">Entry</a></p>
+<p><strong><code>Fields</code></strong> inherited from <a href="#entry-options">Entry Options</a></p>
 <p><strong><code>Lenght</code></strong> <em>(number)</em>: Enforces an explicit, fixed allocation boundary (e.g., number of sequential string characters allocated directly to the byte payload structure).</p>
 <hr />
-<h3 id="enumoptions"><code>EnumOptions</code></h3>
+<h4 id="enum-options"><code>Enum Options</code></h4>
 <p>Configures categorical sets, indexing references, or Roblox Enum arrays to pack integer identifiers efficiently.</p>
 <div class="admonition warning">
 <p class="admonition-title">Critical Persistence Rule: Appending to Literal String Arrays</p>
-<p>When configuring <code>Values</code> using a literal array of strings (<code>{string}</code>), the serialization engine internally maps each entry to its sequential integer index. </p>
+<p>When configuring <code>Values</code> using a literal array of strings (<code>{string}</code>), the serialization engine internally maps each Entry Options to its sequential integer index. </p>
 <p>To maintain data compatibility and persistence over time, you <strong>must only append new strings to the absolute bottom (end) of the array</strong>. Modifying the order, deleting items, or inserting elements anywhere else will shift the internal index mappings, causing existing saved data to point to the wrong string values.</p>
 </div>
 <p><strong>Fields</strong></p>
-<p><strong><code>Fields</code></strong> inherited from <a href="#entry">Entry</a></p>
-<p><strong><code>Values</code></strong> <em>(<code>Enum | {string}</code>)</em>: The explicit master lookup definitions list (such as a Roblox native <code>Enum</code> category or an array of literal state strings).</p>
+<p><strong><code>Fields</code></strong> inherited from <a href="#entry-options">Entry Options</a></p>
+<p><strong><code>Values</code></strong> <em>(Enum | {string})</em>: The explicit master lookup definitions list (such as a Roblox native <code>Enum</code> category or an array of literal state strings).</p>
+<hr />
+<h4 id="tuple-options"><code>Tuple Options</code></h4>
+<p>Configures explicit indexing for tuple entries, which is particularly useful when defining variants.</p>
+<div class="admonition info">
+<p class="admonition-title">Indexing &amp; Validation Behavior</p>
+<ul>
+<li><strong>Sequential Tracking:</strong> Once an index is provided, subsequent data-type calls automatically continue incrementing from that index unless explicitly overridden.</li>
+<li><strong>Validation:</strong> Leaving unassigned indexes or gaps will result in a build error when constructing the logical schema structure.</li>
+</ul>
+</div>
+<p><strong>Fields</strong></p>
+<p><strong><code>Fields</code></strong> inherited from <a href="#entry-options">Entry Options</a>, <a href="#lenght-options">Lenght Options</a> or <a href="#enum-options">Enum Options</a> depending on the method you are invoking.</p>
+<p><strong><code>Index</code></strong> <em>(number, optional)</em>: Explicits where</p>
 <hr />
 <h3 id="core-definition-blocks">Core Definition Blocks</h3>
 <p>The fundamental baseline types supporting the options blocks detailed above.</p>
@@ -1461,9 +1562,14 @@ Retrieves a previously registered schema from the global registry using its defi
 <p>The <code>Compression</code> configuration object defines post-processing compression rules applied immediately before finalizing a binary payload buffer, wrapper-enforcing Roblox's internal buffer compression algorithms via <a href="https://create.roblox.com/docs/reference/engine/classes/EncodingService">EncodingService</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="kr">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nc">Compression</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nc">Type</span><span class="p">:</span><span class="w"> </span><span class="nc">Enum</span><span class="p">.</span><span class="nc">CompressionAlgorithm</span><span class="p">,</span>
+<span class="w">    </span><span class="nc">Threshold</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span><span class="p">,</span>
 <span class="w">    </span><span class="nc">Level</span><span class="p">:</span><span class="w"> </span><span class="nc">number</span><span class="err">?</span>
 <span class="p">}</span>
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Sub-schema Compression Limitation</p>
+<p>Compression on <strong>sub-schemas</strong> will not work since it is unreliable, unefficient and not suggested.</p>
+</div>
 <div class="admonition info">
 <p class="admonition-title">Execution Lifecycle: End-of-Stream Pipeline</p>
 <p>Compression routines act as an automated final layer wrapped cleanly around the data lifecycle. The algorithm is invoked at the <strong>absolute end</strong> of the serialization pipeline (after all structures, options, and variants have been packed) and executes automatically at the <strong>absolute start</strong> of the deserialization process before unpacking any data.</p>
@@ -1476,6 +1582,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <li>Lower levels prioritize execution speed and minimize processing latency.</li>
 <li>If omitted, the framework defaults to the native default compression level specified by Roblox's <a href="https://create.roblox.com/docs/reference/engine/classes/EncodingService">EncodingService</a>.</li>
 </ul>
+<p><strong><code>Threshold</code></strong> <em>(number, optional)</em> Minimum buffer size (in bytes) required to trigger compression. <strong>Default:</strong> <code>128</code></p>
 <hr />
 <h4 id="sanitizers"><strong><code>Sanitizers</code></strong></h4>
 <p><div class="highlight"><pre><span></span><code><span class="kr">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nc">Sanitizers</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">((</span><span class="nc">value</span><span class="p">:</span><span class="w"> </span><span class="nc">any</span><span class="p">,</span><span class="w"> </span><span class="nc">type</span><span class="p">:</span><span class="w"> </span><span class="nc">string</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">any</span><span class="err">?</span><span class="p">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nc">Sanitizers</span><span class="w"> </span><span class="p">}</span>

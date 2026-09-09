@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#optimize-networking" class="md-skip">
+        <a href="#optimize-networking-and-cross-messaging" class="md-skip">
           Skip to content
         </a>
       
@@ -484,15 +484,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#optimize-networking" class="md-nav__link">
+  <a href="#optimize-networking-and-cross-messaging" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optimize Networking
+        Optimize Networking and Cross-Messaging
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Optimize Networking">
+    <nav class="md-nav" aria-label="Optimize Networking and Cross-Messaging">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -516,6 +516,17 @@
     <span class="md-ellipsis">
       
         Optimize Cloud Storage with Flexibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        
       
     </span>
   </a>
@@ -552,13 +563,26 @@
 
   <h1>Usages</h1>
 
-<h2 id="optimize-networking"><strong>Optimize Networking</strong></h2>
-<p>When sending data across the server-client boundary via <code>RemoteEvents</code> or <code>RemoteFunctions</code>, your primary goal is to minimize network bandwidth and completely eliminate serialization overhead.</p>
+<h2 id="optimize-networking-and-cross-messaging"><strong>Optimize Networking and Cross-Messaging</strong></h2>
+<p>When sending data across the server-client boundary via <code>RemoteEvents</code>, <code>RemoteFunctions</code> and <code>MessagingService</code>, your primary goal is to minimize network bandwidth, respect payload limits and completely eliminate serialization overhead.</p>
 <ul>
-<li><strong>How it works:</strong> By using a <strong>Shared Schema</strong> (accessible by both Server and Client) paired with <code>"Flat"</code> mode, the framework linearizes your data structures directly into a continuous binary stream, dropping table overhead and string keys entirely.</li>
-<li><strong>The Performance Edge:</strong> Layering <strong><code>Compress</code></strong> options on top of this flat stream squeezes the payload down to its absolute minimum size. Because the layout is already flat and predictable, Roblox’s underlying <code>EncodingService</code> can compress the buffer with incredibly low CPU overhead, resulting in blistering-fast execution speeds and minimal packet sizes over the wire.</li>
-<li><strong>Secure Inbound Validation:</strong> Beyond sheer performance, you can use <code>Sanitizers</code> directly inside your shared schema options to act as automated security checkpoints. When a client triggers a <code>RemoteFunction</code> or <code>RemoteEvent</code>, the server automatically routes the incoming unpacked data through your sanitization pipeline first. This allows you to clamp unexpected numbers, enforce maximum boundary lengths on user-submitted text, or catch malicious payloads seamlessly during the deserialization phase before the data ever reaches your core game logic.</li>
-<li><strong>Built-in Type Safeguards:</strong> The engine features native, hardcoded type-validation guardrails at the lowest level. For example, when using a numeric type which is not <code>number</code> (int, uint, float, ...), the engine actively blocks illegal or broken numbers like <code>NaN</code> (Not a Number) or <code>inf</code> (Infinity). It forces incoming data to conform strictly to the physics of that specific primitive boundary, catching malformed states and ensuring your code never has to deal with corrupt arithmetic.</li>
+<li>
+<p><strong>How it works:</strong> By using a <strong>Shared Schema</strong> (accessible by both Server and Client) paired with <code>"Flat"</code> mode, the framework linearizes your data structures directly into a continuous binary stream, dropping table overhead and string keys entirely.</p>
+</li>
+<li>
+<p><strong>The Performance Edge:</strong> Layering <strong><code>Compress</code></strong> options on top of this flat stream squeezes the payload down to its absolute minimum size. Because the layout is already flat and predictable, Roblox’s underlying <code>EncodingService</code> can compress the buffer with incredibly low CPU overhead, resulting in blistering-fast execution speeds and minimal packet sizes over the wire.</p>
+</li>
+<li>
+<p><strong>Built-in Type Safeguards:</strong> The engine features native, hardcoded type-validation guardrails at the lowest level. For example, when using a numeric type which is not <code>number</code> (int, uint, float, ...), the engine actively blocks illegal or broken numbers like <code>NaN</code> (Not a Number) or <code>inf</code> (Infinity). It forces incoming data to conform strictly to the physics of that specific primitive boundary, catching malformed states and ensuring your code never has to deal with corrupt arithmetic.</p>
+</li>
+<li>
+<p><strong>Secure Inbound Validation:</strong> Beyond sheer performance, you can use <code>Sanitizers</code> directly inside your shared schema options to act as automated security checkpoints. When a client triggers a <code>RemoteFunction</code> or <code>RemoteEvent</code>, the server automatically routes the incoming unpacked data through your sanitization pipeline first. This allows you to clamp unexpected numbers, enforce maximum boundary lengths on user-submitted text, or catch malicious payloads seamlessly during the deserialization phase before the data ever reaches your core game logic.</p>
+</li>
+<li>
+<ul>
+<li>When transferring data between trusted boundaries, such as Server-to-Client payloads, you can set <a href="../API/#serialization">SkipSanitize</a> to <code>true</code> to completely bypass the sanitization pipeline. This eliminates extra processing overhead for a significant performance gain. However, because validation is skipped entirely, you must manually ensure that all expected fields and arguments are fully provided within the payload to prevent runtime errors.</li>
+</ul>
+</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span><span class="w"> </span><span class="nv">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">PackIt</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="s2">&quot;Schema&quot;</span><span class="p">):</span><span class="nc">Serialize</span><span class="p">(</span><span class="nv">data</span><span class="p">,</span><span class="w"> </span><span class="nv">options</span><span class="p">)</span>
 <span class="c1">-- Send over the network</span>
@@ -574,12 +598,14 @@
 </code></pre></div>
 <hr />
 <h2 id="optimize-cloud-storage-with-flexibility"><strong>Optimize Cloud Storage with Flexibility</strong></h2>
-<p>When saving game data to <strong>Roblox DataStores</strong> or frameworks like <strong>ProfileService</strong>, your primary challenge isn’t network transit—it is long-term flexibility and the ability to safely update your data structures over time.</p>
+<p>When saving game data to <strong>Roblox DataStores</strong>, <strong>MemoryStores</strong> or frameworks like <strong>ProfileService</strong>, your primary challenge isn’t network transit—it is long-term flexibility and the ability to safely update your data structures over time without hitting storage limits.</p>
 <ul>
 <li><strong>How it works:</strong> Roblox DataStores natively support saving raw binary buffers. By saving your data schemas using <code>"Nested"</code> mode, the engine isolates individual dictionaries with distinct structural boundaries, allocating space for new properties to be appended to any nested object layer. This layout is highly optimized for persistent data stores that continuously evolve over time.</li>
 <li><strong>The Storage Edge:</strong> This layout makes it incredibly easy to manage migrations, schema mutations, and backwards-compatible changes across different player versions. As your game expands and features are added, the nested layout ensures old profile data cleanly upgrades without breaking existing save states.</li>
 <li><strong>Compression Savings:</strong> Just like with flat mode, you can layer <strong><code>Compress</code></strong> options on top of your nested layout. This allows you to achieve massive storage optimizations—reducing DataStore footprints by <strong>up to 90%+</strong> compared to json while preserving full structural upgrade flexibility.</li>
 </ul>
+<hr />
+<h2 id="_1"></h2>
 
 
 
