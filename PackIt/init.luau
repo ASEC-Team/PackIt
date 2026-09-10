@@ -28,7 +28,10 @@ local function new(tag: string?, s: Schema.Variant): Schema.Variant
 end
 
 local function aliases(s: Schema.Variant, ...: string?)
-	for _, alias in pairs({...}) do new(alias, s) end
+	for i=1, select("#", 1) do
+		new(select(i, ...), s)
+	end
+	
 	return s
 end
 
@@ -50,4 +53,6 @@ function this.get(tag: string): Schema.Variant
 	return s
 end
 
+_G.ASEC = _G.ASEC or {}
+_G.ASEC.PackIt = this
 return this

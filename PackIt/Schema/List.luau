@@ -4,6 +4,8 @@
 local e = require("../Engine")
 local u = require("./")
 
+local BUDDY_TABLE = table.freeze({})
+
 local this, methods = {}, {}
 
 local function setList(self: u.ListVariant, value: u.Variant|e.EntryType, options: u.UnifiedEntryOptions?)
@@ -134,7 +136,7 @@ end
 function methods:Template(options: u.Versioning, lists: boolean?): u.ListData
 	local options = u.versioning(self, options)
 	local logi = builLogicalSchema(self, options.Variant)
-	return u.sanitizeList(logi, {}, true, lists)
+	return u.sanitizeList(logi, BUDDY_TABLE, true, lists)
 end
 
 -- Pre-generates the schema for each variant

@@ -50,12 +50,12 @@ type DictMethods = {
 	Logic: (self: DictVariant, options: Versioning?) -> SchematizedDict,
 	Variant: (self: DictVariant, version: number?) -> DictVariant,
 	Build: (self: DictVariant) -> DictVariant,
-	
+
 	schema: (self: DictVariant, key: string, schema: Variant|Schema, options: e.SerOptions?) -> DictVariant,
 	tuple: (self: DictVariant, key: string, func: (tuple: TupleVariant) -> ()) -> DictVariant,
 	dict: (self: DictVariant, key: string, func: (dict: DictVariant) -> ()) -> DictVariant,
 	list: (self: DictVariant, key: string, func: (list: ListVariant) -> ()) -> DictVariant,
-	
+
 	brickcolor: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	varchar: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	color3: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
@@ -66,22 +66,22 @@ type DictMethods = {
 	auto: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	enum: (self: DictVariant, key: string, options: e.EnumOptions) -> DictVariant,
 	id: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
-	
+
 	number: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	float: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	uint: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	int: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
-	
+
 	numberVec3: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	floatVec3: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	uintVec3: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	intVec3: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
-	
+
 	numberVec2: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	floatVec2: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	uintVec2: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	intVec2: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
-	
+
 	lcframe: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant,
 	cframe: (self: DictVariant, key: string, options: e.EntryOptions?) -> DictVariant
 }
@@ -171,12 +171,12 @@ type ListMethods = {
 	Logic: (self: ListVariant, options: Versioning?) -> SchematizedList,
 	Variant: (self: ListVariant, version: number?) -> ListVariant,
 	Build: (self: ListVariant) -> ListVariant,
-	
+
 	schema: (self: ListVariant, schema: Variant|Schema, options: e.SerOptions?) -> (),
 	tuple: (self: ListVariant, func: (tuple: TupleVariant) -> ()) -> ListVariant,
 	dict: (self: ListVariant, func: (dict: DictVariant) -> ()) -> (),
 	list: (self: ListVariant, func: (list: ListVariant) -> ()) -> (),
-	
+
 	brickcolor: (self: ListVariant, options: e.EntryOptions?) -> (),
 	varchar: (self: ListVariant, options: e.EntryOptions?) -> (),
 	color3: (self: ListVariant, options: e.EntryOptions?) -> (),
@@ -202,7 +202,7 @@ type ListMethods = {
 	floatVec2: (self: ListVariant, options: e.EntryOptions?) -> (),
 	uintVec2: (self: ListVariant, options: e.EntryOptions?) -> (),
 	intVec2: (self: ListVariant, options: e.EntryOptions?) -> (),
-	
+
 	lcframe: (self: ListVariant, options: e.EntryOptions?) -> (),
 	cframe: (self: ListVariant, options: e.EntryOptions?) -> ()
 }
@@ -222,11 +222,15 @@ type Map = {[any]: {
 	_idx: number
 }|Map}
 
+local BUDDY_TABLE = table.freeze({})
+local sanitizePlans = setmetatable({}, { __mode = "k" })
+local serializationCaches = setmetatable({}, { __mode = "k" })
+
 local function getError(msg: any)
 	if type(msg) ~= "string" then
 		return tostring(msg)
 	end
-	
+
 	return (string.gsub(msg, "^.-:%d+:?%s*", ""))
 end
 
@@ -249,11 +253,11 @@ end
 local function isListData(data: any): boolean
 	if type(data) ~= "table" then return false end
 	local l = #data
-	
+
 	if l == 0 then
 		return next(data) == nil
 	end
-	
+
 	local key = next(data, l)
 	return key == nil
 end
@@ -284,13 +288,11 @@ local function processEntryType(t: Variant|e.EntryType, map: Map, key: string?, 
 end
 
 local function mergeLatest(old: {[string]: any}?, new: {[string]: any}?)
-	if not old then return new or {} end
+	if not old then return new or BUDDY_TABLE end
 	if not new then return old end
 
 	local merged = table.clone(old)
-	for k, v in pairs(new) do
-		merged[k] = v
-	end
+	for k, v in new do merged[k] = v end
 	return merged
 end
 
@@ -305,9 +307,9 @@ function this.getVariant(self: Schema|Variant, variant: number): Variant
 end
 
 function this.versioning(self: Schema|Variant, options: Versioning?): _Versioning
-	local options = options or {} :: Versioning
+	local options = options or BUDDY_TABLE :: Versioning
 	local base = this.getBase(self)
-	
+
 	return {
 		Variant = options.Variant or #base._variants,
 		Engine = options.Engine or #e.versions
@@ -315,16 +317,46 @@ function this.versioning(self: Schema|Variant, options: Versioning?): _Versionin
 end
 
 function this.serialization(self: Schema|Variant, options: SerOptions?): _SerOptions
-	local options = options or {} :: SerOptions
-	local ver = this.versioning(self, options)
-	
-	return {
-		SkipSanitize = not not options.SkipSanitize,
-		Mode = options.Mode or "Flat" :: "Flat",
+	local options = options or BUDDY_TABLE :: SerOptions
+	local base = this.getBase(self)
+	local cache = serializationCaches[base]
+	if not cache then
+		cache = setmetatable({}, { __mode = "k" })
+		serializationCaches[base] = cache
+	end
+
+	local variant = options.Variant or #base._variants
+	local engine = options.Engine or #e.versions
+	local mode = options.Mode or "Flat" :: "Flat"
+	local skipSanitize = not not options.SkipSanitize
+	local preallocate = options.Preallocate
+	local cached = cache[options]
+	if cached and cached.Variant == variant
+		and cached.Engine == engine
+		and cached.Mode == mode
+		and cached.SkipSanitize == skipSanitize
+		and cached.Preallocate == preallocate then
+		cached.Value.Compress = options.Compress
+		return cached.Value
+	end
+
+	local serialization = {
+		SkipSanitize = skipSanitize,
+		Preallocate = preallocate,
+		Mode = mode,
 		Compress = options.Compress,
-		Variant = ver.Variant,
-		Engine = ver.Engine
+		Variant = variant,
+		Engine = engine
 	}
+	cache[options] = {
+		Value = serialization,
+		SkipSanitize = skipSanitize,
+		Preallocate = preallocate,
+		Mode = mode,
+		Variant = variant,
+		Engine = engine
+	}
+	return serialization
 end
 
 function this.variant(self: Schema|Variant, that: any, version: number?): Variant
@@ -341,13 +373,13 @@ end
 
 function this.schematizeList(logical: SchematizedList, map: Map, variant: ListVariant): SchematizedList
 	local logic = variant._logical
-	
+
 	if type(logical) == "table" then
 		logical.options = if type(logical.options) == "table" 
 			then mergeLatest(logical.options :: any, logic.options :: any) 
 			else logic.options
 	end
-	
+
 	local t = logic.type
 	if not t then error("List type not specified") end
 	logical.type = processEntryType(t, map, nil, logical.type)
@@ -356,8 +388,6 @@ function this.schematizeList(logical: SchematizedList, map: Map, variant: ListVa
 end
 
 function this.schematizeDict(logical: SchematizedDict, map: Map, variant: DictVariant): SchematizedDict
-	local b = {} :: DictEntry
-
 	for _, e in variant._logical.entries do
 		if string.sub(e.key, 1, 1) == "_" then error("Keys cannot start with '_'") end
 
@@ -366,8 +396,8 @@ function this.schematizeDict(logical: SchematizedDict, map: Map, variant: DictVa
 			and record._data :: DictEntry and record._data.type)
 
 		record = map[e.key]
-		local r: any = record and record._data or b
-		
+		local r: any = record and record._data or BUDDY_TABLE
+
 		local data = {
 			options = mergeLatest(r.options, e.options :: any),
 			key = e.key,
@@ -397,126 +427,203 @@ end
 
 local function applySanitizers(sanitizers: e.Sanitizers?, value: any, t: e.Entry, o: e.EntryOptions)
 	if not sanitizers then return value end
-	
+	local typeName = t.name
+
 	for _, sanit in sanitizers do
-		if type(sanit) == "table" then
-			value = applySanitizers(sanit, value, t, o)
-			continue
+		local ty = typeName
+		if typeName == "auto" then
+			ty = (t :: any):Type(value, o)
 		end
-		
-		local ty = (t :: any):Type(value, o)
 		local new = sanit(value, ty)
 		value = if new ~= nil then
 			new else value
 	end
-	
+
 	return value
+end
+
+local function flattenSanitizers(sanitizers: e.Sanitizers?): {any}?
+	if not sanitizers then return nil end
+
+	local flattened = {}
+	local function append(values: e.Sanitizers)
+		for _, sanit in values do
+			if type(sanit) == "table" then
+				append(sanit)
+			else
+				table.insert(flattened, sanit)
+			end
+		end
+	end
+
+	append(sanitizers)
+	return flattened
+end
+
+local function getDictSanitizePlan(logi: SchematizedDict): {any}
+	local plan = sanitizePlans[logi]
+	if plan then return plan end
+
+	plan = table.create(#logi)
+	for i = 1, #logi do
+		local entry = logi[i]
+		local typeName = entry.type
+		local item = {
+			key = entry.key,
+			type = typeName,
+			options = entry.options or BUDDY_TABLE,
+			sanitizers = flattenSanitizers((entry.options :: any)
+				and (entry.options :: any).Sanitizers)
+		}
+		if type(typeName) == "string" then
+			item.entry = e.getType(typeName)
+		end
+		plan[i] = item
+	end
+
+	sanitizePlans[logi] = plan
+	return plan
+end
+
+local function getListSanitizePlan(logi: SchematizedList): any
+	local plan = sanitizePlans[logi]
+	if plan then return plan end
+
+	local typeName = logi.type
+	plan = {
+		type = typeName,
+		options = logi.options or BUDDY_TABLE,
+		sanitizers = flattenSanitizers((logi.options :: any)
+			and (logi.options :: any).Sanitizers)
+	}
+	if type(typeName) == "string" then
+		plan.entry = e.getType(typeName)
+	else
+		plan.action = isListSchema(typeName) and this.sanitizeList or this.sanitizeDict
+	end
+
+	sanitizePlans[logi] = plan
+	return plan
 end
 
 function this.sanitizeList(logi: SchematizedList, data: ListData, template: boolean?, lists: boolean?): ListData
 	if not isListData(data) then error(`Data is not a list: {data}`) end
-	
-	local action
-	if type(logi.type) ~= "string" then
-		action = isListSchema(logi.type) and
-			this.sanitizeList or this.sanitizeDict
-	end
-	
-	local o = (logi.options or {}) :: any
+
+	local plan = getListSanitizePlan(logi)
+	local action = plan.action
+	local typeName = plan.type
+
+	local o = plan.options :: any
 	if template and lists and #data < 1 then
-		table.insert(data, action and {} or (o.Default or e
+		table.insert(data, action and BUDDY_TABLE or (o.Default or e
 			.getType(logi.type :: string):Default()))
 	end
-	
-	local sanit = {}
+
+	local sanit = table.create(#data)
 	for i, v in data do
 		if action then
 			sanit[i] = (action :: any)(logi.type, v, template)
 			continue
 		end
-		
-		if logi.type == "schema" then
+
+		if typeName == "schema" then
 			sanit[i] = if template then
 				(o.Schema :: any):Template(o.SerOptions, lists)
-				else (o.Schema :: any):Load(v or {}, o.SerOptions)
-			
+				else (o.Schema :: any):Load(v or BUDDY_TABLE, o.SerOptions)
+
 			continue
 		end
-		
-		local t = e.getType(logi.type :: string)
-		local succ, err = pcall(function()
-			v = applySanitizers(o.Sanitizers, v, t, o)
+
+		local t = plan.entry
+		if not template then
+			v = applySanitizers(plan.sanitizers, v, t, o)
 			v = t:Sanitize(v, o)
-		end)
-		
-		if template and not succ then -- Force default value
-			v = o.Default or t:Default()
-			
-			succ, err = pcall(function()
-				v = applySanitizers(o.Sanitizers, v, t, o)
+		else
+			local succ, err = pcall(function()
+				v = applySanitizers(plan.sanitizers, v, t, o)
 				v = t:Sanitize(v, o)
 			end)
+
+			if not succ then -- Force default value
+				v = o.Default or t:Default()
+
+				succ, err = pcall(function()
+					v = applySanitizers(plan.sanitizers, v, t, o)
+					v = t:Sanitize(v, o)
+				end)
+			end
+
+			if not succ then error(`Failed to sanitize data for index {i}: {getError(err)}`) end
 		end
-		
-		if not succ then error(`Failed to sanitize data for index {i}: {getError(err)}`) end
 		sanit[i] = v
 	end
-	
+
 	return sanit
 end
 
 function this.sanitizeDict(logi: SchematizedDict, data: DictData, template: boolean?, lists: boolean?): DictData
 	if not isDictData(data) then error(`Data is not a dictionary: {data}`) end
-	local sanit, b = {}, {}
+	local sanit = {}
 
-	for _, entry in logi do
-		local value = data[entry.key]
-		local t = entry.type
-		
+	local plan = getDictSanitizePlan(logi)
+	for i = 1, #plan do
+		local field = plan[i]
+		local value = data[field.key]
+		local t = field.type
+
 		if type(t) ~= "string" then
-			local struct = value or {}
-			
-			sanit[entry.key] = if isListSchema(t) then
+			local struct
+			if lists then
+				struct = value or {}
+			else
+				struct = value or BUDDY_TABLE
+			end
+
+			sanit[field.key] = if isListSchema(t) then
 				this.sanitizeList(t :: SchematizedList, struct, template, lists)
 				else this.sanitizeDict(t :: SchematizedDict, struct, template, lists)
-			
+
 			continue
 		end
-		
-		local o = (entry.options or b) :: UnifiedEntryOptions
+
+		local o = field.options :: UnifiedEntryOptions
 		value = if value ~= nil then
 			value else o.Default
-		
+
 		if t == "schema" then
-			sanit[entry.key] = if template then
+			sanit[field.key] = if template then
 				(o.Schema :: any):Template(o.SerOptions, lists)
-				else (o.Schema :: any):Load(value or {}, o.SerOptions)
-				
+				else (o.Schema :: any):Load(value or BUDDY_TABLE, o.SerOptions)
+
 			continue
 		end
-		
-		local t = e.getType(entry.type :: string)
+
+		local entryType = field.entry
 		if template then
 			value = if value ~= nil then
-				value else t:Default()
+				value else entryType:Default()
 		end
-		
-		if value == nil then error(`Missing value for key: {entry.key}`) end
-		local succ, err = pcall(function()
-			value = applySanitizers(o.Sanitizers, value, t, o)
-			value = t:Sanitize(value, o)
-		end)
-		
-		if template and not succ then -- Force default value
-			value = o.Default or t:Default()
-			succ, err = pcall(function()
-				value = applySanitizers(o.Sanitizers, value, t, o)
-				--value = t:Sanitize(value, o)
+
+		if value == nil then error(`Missing value for key: {field.key}`) end
+		if not template then
+			value = applySanitizers(field.sanitizers, value, entryType, o)
+			value = entryType:Sanitize(value, o)
+		else
+			local succ, err = pcall(function()
+				value = applySanitizers(field.sanitizers, value, entryType, o)
+				value = entryType:Sanitize(value, o)
 			end)
+
+			if not succ then -- Force default value
+				value = o.Default or entryType:Default()
+				succ, err = pcall(function()
+					value = applySanitizers(field.sanitizers, value, entryType, o)
+				end)
+			end
+
+			if not succ then error(`Failed to sanitize data for key {field.key}: {getError(err)}`) end
 		end
-		
-		if not succ then error(`Failed to sanitize data for key {entry.key}: {getError(err)}`) end
-		sanit[entry.key] = value
+		sanit[field.key] = value
 	end
 
 	return sanit

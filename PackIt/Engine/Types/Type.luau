@@ -6,11 +6,13 @@ local e = require("../Enums")
 local s = e.Sanitizers
 
 local this, methods = {}, {}
+local parserCache = setmetatable({}, { __mode = "k" })
+local sanitizeOptionCache = setmetatable({}, { __mode = "k" })
 
 export type Sanitizers = {((value: any, type: string) -> any?)|Sanitizers}
 export type EntryType = string -- Supposed to be "type1"|"type2"|...
 
-export type IntSizes = e.ByteSize|e.WordSize|e.DWordSize
+export type IntSizes = e.ByteSize|e.WordSize|e.TriByteSize|e.DWordSize
 export type FloatSizes = e.DWordSize|e.QWordSize
 export type Sizes = IntSizes|e.QWordSize
 export type ByteSize = e.ByteSize
@@ -77,18 +79,10 @@ type Proto = {
 
 local function getSizes(self: Entry)
 	local sizes = {}
-	for key, _ in pairs(self._this) do
+	for key, _ in self._this do
 		table.insert(sizes, key)
 	end
 	return sizes
-end
-
-local function dictCopy(dict: {[string]: any})
-	local copy = {}
-	for k, v in pairs(dict) do
-		copy[k] = v
-	end
-	return copy
 end
 
 local function getParser(self: Entry, size: number?): Parser
@@ -111,18 +105,40 @@ local function getVariant(self: Entry, tag: string?): Entry
 end
 
 local function useOptions(self: Entry, options: ParserOptions?): Parser
-	local options = options or {} :: ParserOptions
-	return getParser(getVariant(self, options.tag), options.size)
+	local size = options and options.size
+	local tag = options and options.tag
+	if not options then
+		return getParser(getVariant(self, tag), size)
+	end
+
+	local cache = parserCache[self]
+	if not cache then
+		cache = setmetatable({}, { __mode = "k" })
+		parserCache[self] = cache
+	end
+
+	local parser = cache[options]
+	if parser then return parser end
+
+	parser = getParser(getVariant(self, tag), size)
+	cache[options] = parser
+	return parser
 end
 
 function methods:Variant(tag: string, defParser: number, parsers: Parsers)
 	self._variants[tag] = this.new(self.name, defParser, parsers)
 end
 
+function methods:Parser(options: ParserOptions?): Parser
+	return useOptions(self, options)
+end
+
 function methods:Write(b: buffer, offset: number, value: any, options: ParserOptions?): number
 	local parser = useOptions(self, options)
 	local off = parser.write(b, offset, value, options)
-	return off or offset +(self :: Entry):Bytes(value, options) :: number
+	return off or offset + (parser.lenght
+		and parser.lenght(value, options)
+		or parser.size or 0) --(self :: Entry):Bytes(value, options) :: number
 end
 
 function methods:Read(b: buffer, offset: number, options: ParserOptions?): (any, number)
@@ -140,16 +156,34 @@ end
 function methods.Sanitize(self: Entry, val: any, options: EntryOptions): any
 	if not self._san then return val end
 
-	local opt = dictCopy(options :: any)
-	opt.Size = opt.Size or e.Sizes[self._def :: any]
+	local optionsCache = sanitizeOptionCache[self]
+	if not optionsCache then
+		optionsCache = setmetatable({}, { __mode = "k" })
+		sanitizeOptionCache[self] = optionsCache
+	end
 
-	local t = self:Type(val, opt)
-	local r = self:RawValue(val, {
-		options = options
-	})
+	local cached = optionsCache[options]
+	local opt
+	if cached then
+		opt = cached
+	else
+		opt = table.clone(options :: any)
+		opt.Size = opt.Size or e.Sizes[self._def :: any]
+		optionsCache[options] = opt
+	end
+
+	local parser = getParser(self)
+	local typeName = self.name
+	if typeName == "auto" then
+		typeName = (parser :: any).type(val, opt)
+	end
+
+	local raw = parser.raw and parser.raw(val, {
+		options = options :: any
+	}) or val
 	
 	for _, sanit in self._san do
-		val = sanit(r, t, opt) or val
+		val = sanit(raw, typeName, opt) or val
 	end
 	return val
 end
@@ -177,7 +211,7 @@ local metatable = { __index = methods }
 export type Entry = typeof(setmetatable({} :: Proto, metatable))
 
 function this.new(name: string, defParser: number, parsers: Parsers, defaultValue: any?, sanitizers: {(any, string, EntryOptions?) -> any?}?): Entry
-	for size, v in pairs(parsers) do
+	for size, v in parsers do
 		v.size = v.size or size
 	end
 

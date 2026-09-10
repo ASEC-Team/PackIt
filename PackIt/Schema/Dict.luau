@@ -5,9 +5,11 @@ local list = require("./List")
 local e = require("../Engine")
 local u = require("./")
 
+
 local this, methods = {}, {}
 local f = table.freeze
 
+local BUDDY_TABLE = f({})
 local function pushField(self: u.DictVariant, key: string|number?, value: u.Variant|e.EntryType, options: u.UnifiedEntryOptions?)
 	local l = self._logical
 	
@@ -44,9 +46,9 @@ local function builLogicalSchema(self: u.DictVariant, variant: number): u.Schema
 	end
 	
 	if (u.getBase(self) :: u.DictSchema)._indexed then
-		for i, v: any in ipairs(logical) do
+		for i, v: any in logical do
 			if i ~= v.key then
-				return error(`Index {i} is missing in tuple`)
+				error(`Index {i} is missing in tuple`)
 			end
 		end
 	end
@@ -166,7 +168,7 @@ end
 function methods:Template(options: u.Versioning, lists: boolean?): u.DictData
 	local options = u.versioning(self, options)
 	local logi = builLogicalSchema(self, options.Variant)
-	return u.sanitizeDict(logi, {}, true, lists)
+	return u.sanitizeDict(logi, BUDDY_TABLE :: any, true, lists)
 end
 
 -- Pre-generates the schema for each variant

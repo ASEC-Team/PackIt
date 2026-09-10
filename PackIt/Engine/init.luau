@@ -47,14 +47,6 @@ export type Header = {
 	Mode: number
 }
 
-local function dictCopy(dict: {[string]: any})
-	local copy = {}
-	for k, v in pairs(dict) do
-		copy[k] = v
-	end
-	return copy
-end
-
 local function decompress(b: buffer, algoId: number)
 	return EncodingService:DecompressBuffer(b, Enum.CompressionAlgorithm
 		:FromValue(algoId) :: Enum.CompressionAlgorithm)
@@ -77,11 +69,10 @@ end
 
 local HeaderProps = { "Variant", "Engine", "Mode", "Compress" }
 local HeaderCons = function(...)
-	local args, h = {...}, {}
+	local h = {}
 	for i, v in HeaderProps do
-		h[v] = args[i]
+		h[v] = select(i, ...)
 	end
-
 	return h
 end
 
@@ -113,11 +104,10 @@ function this.serialize(logi: Schematized, data: Data, options: _SerOptions): bu
 	if typeof(mode) ~= "number" then error(`Mode {options.Mode} is not supported`) end
 	
 	local comp = options.Compress
-	options.Compress = nil
+	local h = table.clone(header:Default())
 	
-	local h = dictCopy(header:Default())
-	for k, v in pairs(options :: any) do
-		if h[k] then h[k] = v end
+	for k, v in options do
+		if k ~= "Compress" and h[k] then h[k] = v end
 	end
 	
 	h.Mode = mode

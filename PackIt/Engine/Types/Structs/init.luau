@@ -16,14 +16,6 @@ local function mapList(list: {any}): {[string]: any}
 	return map
 end
 
-local function dictCopy(dict: {[string]: any})
-	local copy = {}
-	for k, v in pairs(dict) do
-		copy[k] = v
-	end
-	return copy
-end
-
 local function round(value: number, options: t.ParserOptions?, unround: boolean?)
 	local round = options and options.options and options.options.Round
 	if round then
@@ -426,7 +418,7 @@ function this.auto()
 	end
 	
 	function wrapper.lenght(value: any, options: t.ParserOptions)
-		local options = dictCopy(options :: any)
+		local options = table.clone(options :: any)
 		local v = conformAutoValue(value, options)
 		
 		local type, id = a.getId(v, options)
@@ -434,7 +426,7 @@ function this.auto()
 	end
 	
 	function wrapper.write(b: buffer, offset: number, value: any, options: t.ParserOptions)
-		local options = dictCopy(options :: any)
+		local options = table.clone(options :: any)
 		local v = conformAutoValue(value, options)
 		
 		local type, id = a.getId(v, options)
@@ -443,7 +435,7 @@ function this.auto()
 	end
 	
 	function wrapper.read(b: buffer, offset: number, options: t.ParserOptions)
-		local options = dictCopy(options :: any)
+		local options = table.clone(options :: any)
 		local id = buffer.readu8(b, offset)
 		
 		local type = a.fromId(id, options)

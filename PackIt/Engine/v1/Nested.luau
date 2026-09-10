@@ -14,6 +14,9 @@ local listHeader = s.new("ListHeader", e.Sizes.WORD, {
 })
 
 local dHeaderSize = e.Sizes.WORD +e.Sizes.DWORD
+local BUDDY_TABLE = table.freeze({})
+local parserCache = setmetatable({}, { __mode = "k" })
+
 export type DictHeader = {
 	Count: number,
 	Next: number
@@ -24,17 +27,17 @@ local dictHeader = s.new("DictHeader", dHeaderSize, {
 		write = function(b: buffer, offset: number, value: DictHeader)
 			buffer.writeu16(b, offset, value.Count)
 			offset += e.Sizes.WORD
-			
+
 			buffer.writeu32(b, offset, value.Next)
 			return offset +e.Sizes.DWORD
 		end,
-		
+
 		read = function(b: buffer, offset: number)
 			local h = {} :: DictHeader
-			
+
 			h.Count = buffer.readu16(b, offset)
 			offset += e.Sizes.WORD
-			
+
 			h.Next = buffer.readu32(b, offset)
 			return h, offset +e.Sizes.DWORD
 		end
@@ -49,22 +52,29 @@ type Proto = {
 	_data: t.Data|buffer
 }
 
--- Helpers
-local function copyDict(dict: {[any]: any})
-	local new = {}
-	for k, v in pairs(dict or {}) do
-		new[k] = v
-	end
-	
-	return new
-end
+type FieldPlan = {
+	key: string,
+	parser: t.Parser,
+	options: any,
+	write: t.Write,
+	read: t.Read,
+	length: t.Lenght?,
+	size: number?
+}
+
+local nestedPlans = setmetatable({}, { __mode = "k" })
+local listPlans = setmetatable({}, { __mode = "k" })
 
 local function parserOptions(options: t.UnifiedEntryOptions?)
-	options = options or {} :: t.UnifiedEntryOptions
+	options = options or BUDDY_TABLE :: t.UnifiedEntryOptions
+	local cached = parserCache[options]
+	if cached then return cached end
+
 	local value = options.Values or options.Lenght
 
 	if (options :: any).Schema then
-		local ser = copyDict(options.SerOptions :: any)
+		local ser = options.SerOptions and
+			table.clone(options.SerOptions :: any) or {}
 		ser.Mode = "Nested"
 
 		value = {
@@ -73,12 +83,66 @@ local function parserOptions(options: t.UnifiedEntryOptions?)
 		}
 	end
 
-	return {
+	local parsed = {
 		tag = VERSION,
 		value = value,
 		size = e.Sizes[options.Size :: any],
 		options = options :: t.UnifiedEntryOptions
 	}
+	parserCache[options] = parsed
+	return parsed
+end
+
+local function getFieldPlan(entry: any): FieldPlan?
+	if type(entry.type) ~= "string" then return nil end
+
+	local options = parserOptions(entry.options)
+	local parser = t[entry.type]:Parser(options)
+	return {
+		key = entry.key,
+		parser = parser,
+		options = options,
+		write = parser.write,
+		read = parser.read,
+		length = parser.lenght,
+		size = parser.size
+	}
+end
+
+local function getNestedPlan(logic: t.SchematizedDict, index: number): FieldPlan?
+	local plans = nestedPlans[logic]
+	if not plans then
+		plans = {}
+		nestedPlans[logic] = plans
+	end
+
+	local cached = plans[index]
+	if cached ~= nil then return cached or nil end
+
+	local plan = getFieldPlan(logic[index])
+	plans[index] = plan or false
+	return plan
+end
+
+local function getListPlan(logic: t.SchematizedList): FieldPlan?
+	if type(logic.type) ~= "string" then return nil end
+
+	local cached = listPlans[logic]
+	if cached then return cached end
+
+	local options = parserOptions(logic.options)
+	local parser = t[logic.type]:Parser(options)
+	local plan = {
+		key = "",
+		parser = parser,
+		options = options,
+		write = parser.write,
+		read = parser.read,
+		length = parser.lenght,
+		size = parser.size
+	}
+	listPlans[logic] = plan
+	return plan
 end
 
 local function isListSchema(logi: t.Schematized)
@@ -96,19 +160,24 @@ end
 
 function alloc.list(logic: t.SchematizedList, data: t.ListData): number
 	local size = listHeader:Bytes()
-	if #data <= 0 then return size end
+	local count = #data
+
+	if count <= 0 then return size end
 
 	if type(logic.type) ~= "string" then
-		for _, entry in data do
+		for i = 1, count do
+			local entry = data[i]
 			size += alloc.object(logic.type :: t.Schematized, entry)
 		end
 
 		return size
 	end
 
-	local opts = parserOptions(logic.options)
-	for _, entry in data do
-		size += t[logic.type]:Bytes(entry, opts :: any)
+	local plan = getListPlan(logic) :: FieldPlan
+	for i = 1, count do
+		local entry = data[i]
+		size += plan.length and plan.length(entry, plan.options)
+			or plan.size or 0
 	end
 
 	return size
@@ -120,8 +189,9 @@ function alloc.dictSlice(logic: t.SchematizedDict, data: t.DictData, count: numb
 
 	for i=count or 1, tot do
 		local entry = logic[i]
+		local field = getNestedPlan(logic, i)
 
-		if type(entry.type) ~= "string" then
+		if not field then
 			size += alloc.object(entry.type :: t.Schematized, data[entry.key])
 			if i >= tot then break end
 
@@ -129,8 +199,8 @@ function alloc.dictSlice(logic: t.SchematizedDict, data: t.DictData, count: numb
 			break
 		end
 
-		size += t[entry.type]:Bytes(data[entry.key],
-			parserOptions(entry.options) :: any)
+		size += field.length and field.length(data[field.key], field.options)
+			or field.size or 0
 	end
 
 	return size
@@ -151,16 +221,19 @@ function ser.list(logic: t.SchematizedList, data: t.ListData, b: buffer, offset:
 	if count <= 0 then return offset end
 
 	if type(logic.type) ~= "string" then
-		for _, entry in data do
-			offset = ser.object(logic.type :: t.Schematized, entry, b, offset)
+		for i=1, count do
+			offset = ser.object(logic.type :: t.Schematized, data[i], b, offset)
 		end
 
 		return offset
 	end
 
-	local opts = parserOptions(logic.options)
-	for _, entry in data do
-		offset = t[logic.type]:Write(b, offset, entry, opts :: any)
+	local plan = getListPlan(logic) :: FieldPlan
+	for i=1, count do
+		local entry = data[i]
+		local nextOffset = plan.write(b, offset, entry, plan.options)
+		offset = nextOffset or offset + (plan.length
+			and plan.length(entry, plan.options) or plan.size or 0)
 	end
 	return offset
 end
@@ -176,7 +249,8 @@ function ser.dictSlice(logic: t.SchematizedDict, data: t.DictData, b: buffer, of
 
 	for i = startIdx, tot do
 		local entry = logic[i]
-		if type(entry.type) ~= "string" then
+		local field = getNestedPlan(logic, i)
+		if not field then
 			offset = ser.object(entry.type :: t.Schematized, data[entry.key], b, offset)
 
 			if i < tot then
@@ -188,7 +262,9 @@ function ser.dictSlice(logic: t.SchematizedDict, data: t.DictData, b: buffer, of
 			break
 		end
 
-		offset = t[entry.type]:Write(b, offset, data[entry.key], parserOptions(entry.options) :: any)
+		local nextOffset = field.write(b, offset, data[field.key], field.options)
+		offset = nextOffset or offset + (field.length
+			and field.length(data[field.key], field.options) or field.size or 0)
 	end
 
 	h.Count = tot - startIdx + 1
@@ -218,9 +294,11 @@ function deser.list(logic: t.SchematizedList, b: buffer, offset: number): (t.Lis
 		return data, offset
 	end
 
-	local opts = parserOptions(logic.options)
+	local plan = getListPlan(logic) :: FieldPlan
 	for i = 1, count do
-		data[i], offset = t[logic.type]:Read(b, offset, opts :: any)
+		local value, nextOffset = plan.read(b, offset, plan.options)
+		data[i] = value
+		offset = nextOffset or offset + (plan.size or 0)
 	end
 
 	return data, offset
@@ -238,19 +316,21 @@ function deser.dictSlice(logic: t.SchematizedDict, b: buffer, offset: number, st
 			warn(`An entry might have been removed from the schema at index: {i}`)
 			continue
 		end
-		
-		if type(entry.type) ~= "string" then
+
+		local field = getNestedPlan(logic, i)
+		if not field then
 			data[entry.key], offset = deser.object(entry.type :: t.Schematized, b, offset)
 			continue
 		end
-		
-		local opts = parserOptions(entry.options)
-		data[entry.key], offset = t[entry.type]:Read(b, offset, opts :: any)
+
+		local value, nextOffset = field.read(b, offset, field.options)
+		data[field.key] = value
+		offset = nextOffset or offset + (field.size or 0)
 	end
 
 	if h.Next > 0 then
 		local nxt, finalOffset = deser.dictSlice(logic, b, dataBase +h.Next, currentIdx +h.Count)
-		for k, v in pairs(nxt) do data[k] = v end
+		for k, v in nxt do data[k] = v end
 		return data, finalOffset
 	end
 
