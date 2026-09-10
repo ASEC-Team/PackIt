@@ -17,4 +17,8 @@ The framework is engineered from the ground up for high extensibility, allowing 
 ---
 
 ## Documentation
-Learn more about this at: [PackIt Docs](https://asec-team.github.io/PackIt/)
+Learn more about this at:
+
+[DevForum Post](https://devforum.roblox.com/t/packit-flexible-schematized-binary-serialization-sanitization-compression-and-more-intelligent-data-pipelines/4725177)
+
+[PackIt Docs](https://asec-team.github.io/PackIt/)
