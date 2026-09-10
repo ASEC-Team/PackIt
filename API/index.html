@@ -1246,7 +1246,7 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>bits</code></strong></td>
 <td style="text-align: left;"><code>:bits(key, options?)</code></td>
 <td style="text-align: left;"><code>:bits(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Bitmask layout configuration, boolean array</td>
 </tr>
 <tr>
@@ -1260,21 +1260,21 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>varchar</code></strong></td>
 <td style="text-align: left;"><code>:varchar(key, options?)</code></td>
 <td style="text-align: left;"><code>:varchar(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Variable-length text value string serialization.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>buffer</code></strong></td>
 <td style="text-align: left;"><code>:buffer(key, options?)</code></td>
 <td style="text-align: left;"><code>:buffer(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Raw data buffer payload stream embedded directly into the schema.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>enum</code></strong></td>
 <td style="text-align: left;"><code>:enum(key, options)</code></td>
 <td style="text-align: left;"><code>:enum(options)</code></td>
-<td style="text-align: left;"><a href="#enum-options">Enum Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#enum-options">Enum Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Maps an enumerated value, EnumItem, string or number.</td>
 </tr>
 <tr>
@@ -1325,14 +1325,14 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>int</code></strong></td>
 <td style="text-align: left;"><code>:int(key, options?)</code></td>
 <td style="text-align: left;"><code>:int(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Signed runtime integer scalar format.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uint</code></strong></td>
 <td style="text-align: left;"><code>:uint(key, options?)</code></td>
 <td style="text-align: left;"><code>:uint(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Unsigned runtime integer scalar layout format.</td>
 </tr>
 </tbody>
@@ -1369,14 +1369,14 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>intVec2</code></strong></td>
 <td style="text-align: left;"><code>:intVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:intVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">int</a>.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uintVec2</code></strong></td>
 <td style="text-align: left;"><code>:uintVec2(key, options?)</code></td>
 <td style="text-align: left;"><code>:uintVec2(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Vector2 data in <a href="#numeric-scalars">uint</a>.</td>
 </tr>
 <tr>
@@ -1397,14 +1397,14 @@ Retrieves a previously registered schema from the global registry using its defi
 <td style="text-align: left;"><strong><code>intVec3</code></strong></td>
 <td style="text-align: left;"><code>:intVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:intVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">int</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong><code>uintVec3</code></strong></td>
 <td style="text-align: left;"><code>:uintVec3(key, options?)</code></td>
 <td style="text-align: left;"><code>:uintVec3(options?)</code></td>
-<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | DWORD</code></td>
+<td style="text-align: left;"><a href="#entry-options">Entry Options</a><br><a href="#tuple-options">Tuple Options</a><br><code>Size: BYTE | WORD | TRIBYTE | DWORD</code></td>
 <td style="text-align: left;">Vector3 data in <a href="#numeric-scalars">uint</a></td>
 </tr>
 </tbody>
